@@ -485,8 +485,9 @@ final class AppModel {
 // MARK: - Links
 
 enum AppLinks {
-    /// Placeholder matching `.github/ISSUE_TEMPLATE/config.yml`; replace when the repo is
-    /// published. Linked from onboarding and Settings, never opened automatically.
+    /// Matches `.github/ISSUE_TEMPLATE/config.yml`. Opened in the browser from onboarding
+    /// and Settings only — never fetched by the app, so `github.com` stays out of the
+    /// network allowlist.
     static let readme = URL(string: "https://github.com/ies0411/Fillline#privacy")!
     static let readmePolicy = URL(string: "https://github.com/ies0411/Fillline#unofficial-and-what-that-means")!
 }

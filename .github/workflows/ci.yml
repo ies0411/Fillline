@@ -72,6 +72,9 @@ jobs:
       #   api.anthropic.com   - Claude Code usage endpoint
       #   chatgpt.com         - Codex usage fallback endpoint
       #   opencode.ai         - OpenCode Go usage endpoint
+      #   github.com          - LINK ONLY (AppLinks: privacy/policy pages opened in the
+      #                         browser via NSWorkspace). The app never fetches this host;
+      #                         it is not part of the network allowlist in Sources/.
       #
       # Any other host - including documentation URLs - must not appear in
       # Sources/. Adding a host is a separate PR that updates both this list
@@ -90,7 +93,7 @@ jobs:
               url = $0
               sub(/^[^:]+:[0-9]+:/, "", url)
               sub(/^https?:\/\//, "", url)
-              if (url !~ /^(api\.anthropic\.com|chatgpt\.com|opencode\.ai)$/) print $0
+              if (url !~ /^(api\.anthropic\.com|chatgpt\.com|opencode\.ai)$/ && url !~ /^github\.com$/) print $0
             }')
           if [ -n "$offenders" ]; then
             echo "::error::URL outside the domain allowlist found in Sources/:"
