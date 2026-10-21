@@ -9,6 +9,10 @@ broken parser ships as a patch release.
 
 ## [Unreleased]
 
+## [0.2.1-alpha.1] — 2026-10-21
+
+Third alpha. One visible change: a stale card now tells you *why* it is stale.
+
 ### Added
 - `UsageSnapshot.consecutiveFailures`: a stale card now says how many refreshes in a row
   failed (`stale · 4m ago · 3 failures`), and VoiceOver reads the count in words. Old

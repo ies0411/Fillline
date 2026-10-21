@@ -5,7 +5,7 @@
     "repo": "https://github.com/ies0411/Fillline",
     "status": "pre-alpha",
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
-    "version": "v0.2.0-alpha.1",
+    "version": "v0.2.1-alpha.1",
     "license": "MIT",
     "commits": 25,
     "branch": "main",
@@ -474,6 +474,10 @@
     {
       "date": "2026-10-21",
       "text": "stale 카드에 연속 실패 횟수 표시 — 값이 오래된 이유가 '한 번 실패'인지 '계속 실패'인지 구분. 테스트 116개"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "v0.2.1-alpha.1 릴리스 — stale 카드가 연속 실패 횟수를 표시(116 tests)"
     }
   ]
 }
