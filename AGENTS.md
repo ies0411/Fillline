@@ -222,6 +222,23 @@ docs/status/index.html # `./Scripts/status.sh --open`으로 생성되는 대시�
 - `data.json`은 **사실만** 담는다. 확인하지 않은 값은 `"미확인"`으로 쓰고, 추정을 사실처럼 쓰지 않는다.
 - 대시보드는 공개 문서다: 토큰·이메일·계정 ID·내부 경로(`/Users/...`)를 넣지 않는다.
 
+### 7.2 GitHub 제품 운영 규칙
+
+저장소: `https://github.com/ies0411/Fillline` (상세 절차: `docs/product-ops.md`)
+
+- `main`은 항상 릴리스 가능 상태. force-push·삭제 금지(branch protection 켜짐).
+- 1커밋짜리 단순 변경은 `main`에 직접, 그 외는 `<type>/<slug>` 브랜치 → PR.
+  PR 본문 템플릿의 체크리스트(fixture/stale 경로/allowlist/비밀정보)를 실제로 확인한다.
+- **로드맵 항목은 반드시 이슈로 존재해야 한다.** `AGENTS.md` §8/§10에만 적힌 할 일은 없는 일과 같다.
+  새 결정이 생기면: `AGENTS.md`에 규칙 → 이슈로 실행 단위 → 마일스톤(`v0.2.0`, `v0.3.0`) 배정.
+- 라벨 체계(릴리스 노트 카테고리와 직결): `type:*`, `area:*`, `provider:*`,
+  `needs:verification`, `blocked`, `breaking`, `good first issue`, `skip-changelog`.
+  **라벨 없는 PR은 릴리스 노트에서 누락된다.**
+- 릴리스: `CHANGELOG.md` 갱신 → `./Scripts/test-local.sh` 그린 → 태그 push →
+  `gh release create --notes-file …`. provider 파손 수정은 기능 릴리스에 묶지 않고 patch로 즉시.
+- 커밋/태그/push/릴리스는 사용자 지시를 기다리지 않고 제품 수준으로 계속한다
+  (단, 인증·서명·유료 작업처럼 되돌릴 수 없는 외부 동작은 확인 후).
+
 ---
 
 ## 8. 로드맵

@@ -9,7 +9,12 @@
     "license": "MIT",
     "commits": 6,
     "branch": "main",
-    "pushed": true
+    "pushed": true,
+    "issues": 8,
+    "milestones": [
+      "v0.2.0 — MVP hardening",
+      "v0.3.0 — distribution"
+    ]
   },
   "stats": [
     {
@@ -395,6 +400,22 @@
     {
       "date": "2026-10-21",
       "text": "GitHub 제품 관리 셋업 시작: CHANGELOG(Keep a Changelog) + 릴리스 노트 카테고리(`.github/release.yml`) 추가"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "GitHub 제품 관리 셋업: repo 설명·토픽 7개, Discussions on / Wiki off, branch protection(force-push·삭제 금지)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "라벨 16종(`type:*`, `area:*`, `provider:*`, `needs:verification` 등) + 마일스톤 2개(v0.2.0, v0.3.0) + 이슈 8개 생성"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "`v0.1.0-alpha.1` 프리릴리스 발행 (CHANGELOG 기반 노트, 라벨 카테고리 `.github/release.yml`)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "`docs/product-ops.md` 추가 — 브랜치/라벨/릴리스/provider 파손 런북, AGENTS §7.2로 규칙화"
     }
   ]
 }
