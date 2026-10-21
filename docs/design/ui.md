@@ -160,6 +160,13 @@ Styles (Settings → Menu bar → Label):
 - No data → gauge icon only (`◔`), never `0%`.
 - Antigravity's mark (`◌`) is a ball held above a lift pad, drawn at the same stroke weight
   as the other provider glyphs so it still reads at 12 pt next to the system icons.
+- Every provider mark must land in the same ink band at 10 pt (menu bar) and 12 pt (card),
+  measured as the darkest pixel and the count of fully inked pixels in the 10 px box. The
+  Codex mark (`<>`) was the outlier: at stroke 1.9 its arms were 0.8 px wide and it read
+  127/255 with no solid pixel, next to 26/255 for the filled marks. It is now stroke 3 with
+  **butt caps** — 45/255, 8 solid pixels, 15.3 % ink coverage, level with the bolt (26/255,
+  8, 15.8 %). Round caps are what to avoid when re-tuning: each free end grows by half the
+  stroke, which bridges the top and bottom gaps and turns `<>` into a closed ring at 12 pt.
 - Any value below 5% adds a small warning triangle before the numbers.
 - `~` prefix marks a last-known value; the accessibility label says "approximately".
 - Tooltips are not used in the menu bar (macOS does not reliably show them there).
