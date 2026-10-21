@@ -118,8 +118,8 @@
 
   .legend {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 26px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px 30px;
     padding: 28px 0 6px;
   }
   .legend-item {
@@ -591,6 +591,12 @@
     margin-top: 2px;
     flex: none;
   }
+  /* Command / binary name inside a provenance line. Mono is already a token. */
+  .card-foot code {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: -.01em;
+  }
 
   /* Empty / consent states */
   .state { display: flex; gap: 9px; align-items: flex-start; }
@@ -741,7 +747,7 @@
   /* Specimen grid */
   .specimens {
     display: grid;
-    grid-template-columns: repeat(3, 340px);
+    grid-template-columns: repeat(auto-fit, 340px);
     gap: 42px 30px;
     align-items: start;
   }
@@ -774,8 +780,8 @@
   }
 
   .dark-tray {
-    margin-top: 30px;
-    padding: 30px 28px 34px;
+    margin: 30px -32px 0;
+    padding: 30px 32px 34px;
     border-radius: 18px;
     background-color: #1a1a19;
     background-image: radial-gradient(rgba(255, 255, 255, .05) .6px, transparent .6px);
@@ -818,6 +824,7 @@
     padding: 0 3px;
     border-radius: 3px;
   }
+  .note.wide { grid-column: 1 / -1; }
 
   footer.colophon {
     margin-top: 70px;
@@ -852,6 +859,7 @@
     .legend { grid-template-columns: 1fr; }
     .spec, .pop { width: 340px; }
     .specimens { overflow-x: auto; }
+    .dark-tray { margin-inline: -16px; padding-inline: 16px; }
   }
 </style>
 </head>
@@ -895,6 +903,11 @@
     </symbol>
     <symbol id="i-bolt" viewBox="0 0 24 24">
       <path d="M13.2 2.5L5 13.6h5.4L9.8 21.5 19 10.2h-5.6l-.2-7.7z" fill="currentColor"/>
+    </symbol>
+    <!-- Antigravity: something held off the ground. Ball above a lift pad. -->
+    <symbol id="i-lift" viewBox="0 0 24 24">
+      <circle cx="12" cy="6.6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M5 19.6c0-2.4 3.1-4.1 7-4.1s7 1.7 7 4.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
     </symbol>
     <symbol id="i-clock" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.7"/>
@@ -956,7 +969,7 @@
     <div class="hero">
       <h1>Remaining,<br><em>honestly.</em></h1>
       <div class="hero-meta">
-        <p>A menu-bar instrument for Claude Code, OpenAI Codex, and OpenCode Go. The big number is what's <strong>left</strong>. The meter empties toward the wall. Nothing is invented when a provider cannot answer.</p>
+        <p>A menu-bar instrument for Claude Code, OpenAI Codex, OpenCode Go, and Antigravity — four providers, one glance, one honest number each. The big number is what's <strong>left</strong>. The meter empties toward the wall. Nothing is invented when a provider cannot answer.</p>
         <dl class="specs">
           <div><dt>Popover</dt><dd>340 pt wide</dd></div>
           <div><dt>Type</dt><dd>System / SF Pro</dd></div>
@@ -966,13 +979,13 @@
     </div>
   </header>
 
-  <section class="legend" aria-label="Reading the specimen">
+  <section class="legend theme-light" aria-label="Reading the specimen">
     <div class="legend-item">
       <div class="legend-mark"><span class="pct" style="font-size:17px">98%</span></div>
       <div><h3>Remaining, not used</h3><p>The largest value in a row is headroom. Used-% is a 9.5 pt caption.</p></div>
     </div>
     <div class="legend-item">
-      <div class="legend-mark"><span class="meter" style="width:30px"><span class="fill" style="width:80%"></span><span class="notch" style="left:15%"></span></span></div>
+      <div class="legend-mark"><span class="meter" style="width:34px;height:6px;border:1px solid var(--rule)"><span class="fill" style="width:80%"></span><span class="notch" style="left:15%"></span></span></div>
       <div><h3>The meter fills with remaining</h3><p>Full bar = full quota. The notch is the 15% floor; fall behind it and the bar turns amber.</p></div>
     </div>
     <div class="legend-item">
@@ -983,13 +996,21 @@
       <div class="legend-mark" style="font-family:var(--mono);font-size:10px;color:var(--ink-2)">~62%</div>
       <div><h3>Approximate is marked</h3><p>A tilde means last known, or a placeholder reset time. It is never silent.</p></div>
     </div>
+    <div class="legend-item">
+      <div class="legend-mark" style="font-family:var(--mono);font-size:10px;color:var(--ink-2)">agy</div>
+      <div><h3>The local provider says it is local</h3><p>Antigravity's number comes from running its CLI on this Mac, not from an API call. The card's last line says so, and that no Google credential is read.</p></div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-mark"><span class="status" style="font-size:8px">Opt-in</span></div>
+      <div><h3>Off until asked</h3><p>Antigravity ships off. When it is on, the card says so in one small word — not a banner.</p></div>
+    </div>
   </section>
 
   <section class="section" id="menu-bar">
     <div class="section-head">
       <span class="num">01</span>
       <h2>Menu bar</h2>
-      <p>One number per provider, in fixed order. Every label below is drawn at real menu-bar scale; the only thing macOS does on its own is truncate from the right.</p>
+      <p>One number per provider, in fixed order C / O / G / A. Every label below is drawn at real menu-bar scale; the only thing macOS does on its own is truncate from the right. Antigravity is opt-in, so a stock install shows three numbers — the rows below show the four-provider case, and what it degrades to.</p>
     </div>
 
     <div class="mb-grid">
@@ -1000,8 +1021,9 @@
           <div class="mb-strip">
             <div class="mb-label">
               <span>C 62%</span><span class="mb-dot">·</span>
-              <span>O 51%</span><span class="mb-dot">·</span>
-              <span>G 41%</span>
+              <span>O 40%</span><span class="mb-dot">·</span>
+              <span>G 24%</span><span class="mb-dot">·</span>
+              <span>A 88%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1009,15 +1031,16 @@
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
-          <div class="mb-caption">Letters + numbers — default, fixed order C / O / G</div>
+          <div class="mb-caption">Letters + numbers — default, fixed order C / O / G / A</div>
         </div>
 
         <div class="mb-item">
           <div class="mb-strip">
             <div class="mb-label">
               <svg class="glyph"><use href="#i-sparkles"/></svg><span>62%</span><span class="mb-dot">·</span>
-              <svg class="glyph"><use href="#i-code"/></svg><span>51%</span><span class="mb-dot">·</span>
-              <svg class="glyph"><use href="#i-bolt"/></svg><span>41%</span>
+              <svg class="glyph"><use href="#i-code"/></svg><span>40%</span><span class="mb-dot">·</span>
+              <svg class="glyph"><use href="#i-bolt"/></svg><span>24%</span><span class="mb-dot">·</span>
+              <svg class="glyph"><use href="#i-lift"/></svg><span>88%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1031,7 +1054,8 @@
         <div class="mb-item">
           <div class="mb-strip">
             <div class="mb-label">
-              <svg class="glyph"><use href="#i-sparkles"/></svg><span>41%</span>
+              <svg class="glyph"><use href="#i-code"/></svg><span>40%</span><span class="mb-dot">·</span>
+              <svg class="glyph"><use href="#i-bolt"/></svg><span>24%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1039,12 +1063,12 @@
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
-          <div class="mb-caption">Compact — provider glyph + the lowest value only</div>
+          <div class="mb-caption">Compact — the worst two only; the safety valve when the bar is already crowded</div>
         </div>
 
         <div class="mb-item">
           <div class="mb-strip">
-            <div class="mb-label"><span>G 41%</span></div>
+            <div class="mb-label"><span>G 24%</span></div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
               <span class="battery"></span>
@@ -1059,8 +1083,9 @@
             <div class="mb-label">
               <svg class="glyph warn"><use href="#i-warning"/></svg>
               <span><span class="warn">C 4%</span></span><span class="mb-dot">·</span>
-              <span>O 51%</span><span class="mb-dot">·</span>
-              <span>G 41%</span>
+              <span>O 40%</span><span class="mb-dot">·</span>
+              <span>G 24%</span><span class="mb-dot">·</span>
+              <span>A 88%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1075,8 +1100,9 @@
           <div class="mb-strip">
             <div class="mb-label">
               <span><span class="tilde">~</span>C 62%</span><span class="mb-dot">·</span>
-              <span>O 51%</span><span class="mb-dot">·</span>
-              <span>G 41%</span>
+              <span>O 40%</span><span class="mb-dot">·</span>
+              <span>G 24%</span><span class="mb-dot">·</span>
+              <span>A 88%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1107,8 +1133,9 @@
           <div class="mb-strip">
             <div class="mb-label">
               <span>C 62%</span><span class="mb-dot">·</span>
-              <span>O 51%</span><span class="mb-dot">·</span>
-              <span>G 41%</span>
+              <span>O 40%</span><span class="mb-dot">·</span>
+              <span>G 24%</span><span class="mb-dot">·</span>
+              <span>A 88%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1116,14 +1143,16 @@
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
+          <div class="mb-caption">Letters + numbers — default, fixed order C / O / G / A</div>
         </div>
 
         <div class="mb-item">
           <div class="mb-strip">
             <div class="mb-label">
               <svg class="glyph"><use href="#i-sparkles"/></svg><span>62%</span><span class="mb-dot">·</span>
-              <svg class="glyph"><use href="#i-code"/></svg><span>51%</span><span class="mb-dot">·</span>
-              <svg class="glyph"><use href="#i-bolt"/></svg><span>41%</span>
+              <svg class="glyph"><use href="#i-code"/></svg><span>40%</span><span class="mb-dot">·</span>
+              <svg class="glyph"><use href="#i-bolt"/></svg><span>24%</span><span class="mb-dot">·</span>
+              <svg class="glyph"><use href="#i-lift"/></svg><span>88%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1131,28 +1160,34 @@
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
+          <div class="mb-caption">Icons + numbers — same information, no letters</div>
         </div>
 
         <div class="mb-item">
           <div class="mb-strip">
-            <div class="mb-label"><svg class="glyph"><use href="#i-sparkles"/></svg><span>41%</span></div>
+            <div class="mb-label">
+              <svg class="glyph"><use href="#i-code"/></svg><span>40%</span><span class="mb-dot">·</span>
+              <svg class="glyph"><use href="#i-bolt"/></svg><span>24%</span>
+            </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
               <span class="battery"></span>
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
+          <div class="mb-caption">Compact — the worst two only; the safety valve when the bar is already crowded</div>
         </div>
 
         <div class="mb-item">
           <div class="mb-strip">
-            <div class="mb-label"><span>G 41%</span></div>
+            <div class="mb-label"><span>G 24%</span></div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
               <span class="battery"></span>
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
+          <div class="mb-caption">Lowest provider only — for a genuinely crowded bar</div>
         </div>
 
         <div class="mb-item">
@@ -1160,8 +1195,9 @@
             <div class="mb-label">
               <svg class="glyph warn"><use href="#i-warning"/></svg>
               <span class="warn">C 4%</span><span class="mb-dot">·</span>
-              <span>O 51%</span><span class="mb-dot">·</span>
-              <span>G 41%</span>
+              <span>O 40%</span><span class="mb-dot">·</span>
+              <span>G 24%</span><span class="mb-dot">·</span>
+              <span>A 88%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1169,14 +1205,16 @@
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
+          <div class="mb-caption">Critical — triangle plus the number; colour is not the only cue</div>
         </div>
 
         <div class="mb-item">
           <div class="mb-strip">
             <div class="mb-label">
               <span><span class="tilde">~</span>C 62%</span><span class="mb-dot">·</span>
-              <span>O 51%</span><span class="mb-dot">·</span>
-              <span>G 41%</span>
+              <span>O 40%</span><span class="mb-dot">·</span>
+              <span>G 24%</span><span class="mb-dot">·</span>
+              <span>A 88%</span>
             </div>
             <div class="mb-system">
               <svg class="icon"><use href="#i-wifi"/></svg>
@@ -1184,6 +1222,7 @@
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
+          <div class="mb-caption">Stale but recent — tilde, and omitted after 30 minutes</div>
         </div>
 
         <div class="mb-item">
@@ -1195,6 +1234,7 @@
               <span class="mb-clock">Wed 14:32</span>
             </div>
           </div>
+          <div class="mb-caption">No data / first run — icon only, never 0%</div>
         </div>
       </div>
     </div>
@@ -1214,7 +1254,7 @@
         <figcaption>
           <span class="spec-no">01</span>
           <span class="spec-name">Healthy</span>
-          <span class="spec-note">Three providers, 2 / 2 / 3 windows. Remaining is the hero; used is a caption.</span>
+          <span class="spec-note">Four providers, 2 / 2 / 3 / 2 windows. Remaining is the hero; used is a caption.</span>
         </figcaption>
         <div class="pop">
           <div class="pop-head">
@@ -1335,6 +1375,41 @@
                   </div>
                   <div class="meter"><span class="fill" style="width:26%"></span><span class="notch"></span></div>
                 </div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <svg class="prov"><use href="#i-lift"/></svg>
+                <span class="prov-name">Antigravity</span>
+                <span class="spacer"></span>
+              </div>
+              <div class="rows">
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">88%</span>
+                    <span class="wlabel">5-hour</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 3h 05m</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">12% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                </div>
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">73%</span>
+                    <span class="wlabel">Weekly</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 5d 21h</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">27% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:73%"></span><span class="notch"></span></div>
+                </div>
+              </div>
+              <div class="card-foot">
+                <svg class="icon"><use href="#i-code"/></svg>
+                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
               </div>
             </article>
 
@@ -1482,6 +1557,41 @@
                 </div>
               </div>
             </article>
+            <article class="card">
+              <div class="card-head">
+                <svg class="prov"><use href="#i-lift"/></svg>
+                <span class="prov-name">Antigravity</span>
+                <span class="spacer"></span>
+              </div>
+              <div class="rows">
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">88%</span>
+                    <span class="wlabel">5-hour</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 3h 05m</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">12% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                </div>
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">73%</span>
+                    <span class="wlabel">Weekly</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 5d 21h</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">27% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:73%"></span><span class="notch"></span></div>
+                </div>
+              </div>
+              <div class="card-foot">
+                <svg class="icon"><use href="#i-code"/></svg>
+                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+              </div>
+            </article>
 
           </div>
           <div class="divider"></div>
@@ -1605,6 +1715,41 @@
                   </div>
                   <div class="meter"><span class="fill" style="width:26%"></span><span class="notch"></span></div>
                 </div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <svg class="prov"><use href="#i-lift"/></svg>
+                <span class="prov-name">Antigravity</span>
+                <span class="spacer"></span>
+              </div>
+              <div class="rows">
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">88%</span>
+                    <span class="wlabel">5-hour</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 3h 05m</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">12% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                </div>
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">73%</span>
+                    <span class="wlabel">Weekly</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 5d 21h</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">27% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:73%"></span><span class="notch"></span></div>
+                </div>
+              </div>
+              <div class="card-foot">
+                <svg class="icon"><use href="#i-code"/></svg>
+                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
               </div>
             </article>
 
@@ -1731,6 +1876,41 @@
                 </div>
               </div>
             </article>
+            <article class="card">
+              <div class="card-head">
+                <svg class="prov"><use href="#i-lift"/></svg>
+                <span class="prov-name">Antigravity</span>
+                <span class="spacer"></span>
+              </div>
+              <div class="rows">
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">88%</span>
+                    <span class="wlabel">5-hour</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 3h 05m</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">12% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                </div>
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">73%</span>
+                    <span class="wlabel">Weekly</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 5d 21h</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">27% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:73%"></span><span class="notch"></span></div>
+                </div>
+              </div>
+              <div class="card-foot">
+                <svg class="icon"><use href="#i-code"/></svg>
+                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+              </div>
+            </article>
 
           </div>
           <div class="divider"></div>
@@ -1748,7 +1928,7 @@
         <figcaption>
           <span class="spec-no">05</span>
           <span class="spec-name">Thresholds</span>
-          <span class="spec-note">14% is amber; 4% adds the word LOW. The notch shows how far behind the floor the fill sits.</span>
+          <span class="spec-note">14% is amber; 4% adds the word LOW. The notch shows how far behind the floor the fill sits. Antigravity’s free tier reports weekly only, so its card carries one row.</span>
         </figcaption>
         <div class="pop">
           <div class="pop-head">
@@ -1872,6 +2052,31 @@
                 </div>
               </div>
             </article>
+            <article class="card">
+              <div class="card-head">
+                <svg class="prov"><use href="#i-lift"/></svg>
+                <span class="prov-name">Antigravity</span>
+                <span class="plan">Free</span>
+                <span class="spacer"></span>
+              </div>
+              <div class="rows">
+                <div class="row">
+                  <div class="row-top">
+                    <span class="pct">88%</span>
+                    <span class="wlabel">Weekly</span>
+                    <span class="spacer"></span>
+                    <span class="reset">resets in 5d 21h</span>
+                    <span class="dotsep">·</span>
+                    <span class="used">12% used</span>
+                  </div>
+                  <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                </div>
+              </div>
+              <div class="card-foot">
+                <svg class="icon"><use href="#i-code"/></svg>
+                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+              </div>
+            </article>
 
           </div>
           <div class="divider"></div>
@@ -1903,7 +2108,7 @@
             </div>
 
             <h2 class="onboard-hero">See the wall<br>before you hit it.</h2>
-            <p class="onboard-sub">Remaining usage for Claude Code, Codex, and OpenCode Go — in your menu bar.</p>
+            <p class="onboard-sub">Remaining usage for Claude Code, Codex, OpenCode Go, and Antigravity — in your menu bar.</p>
 
             <div class="privacy">
               <div class="privacy-row">
@@ -1916,7 +2121,7 @@
               </div>
               <div class="privacy-row">
                 <div class="privacy-icon"><svg class="icon"><use href="#i-eye-off"/></svg></div>
-                <div><div class="privacy-title">No telemetry</div><div class="privacy-detail">Nothing is uploaded. Requests go only to the three providers.</div></div>
+                <div><div class="privacy-title">No telemetry</div><div class="privacy-detail">Nothing is uploaded. Only the CLIs and APIs you enable are contacted.</div></div>
               </div>
             </div>
 
@@ -1958,7 +2163,7 @@
           <figcaption>
             <span class="spec-no">07</span>
             <span class="spec-name">Healthy</span>
-            <span class="spec-note">Seven windows, one hierarchy, no signal colour. Dark paper does not soften the order.</span>
+            <span class="spec-note">Nine windows, one hierarchy, no signal colour. Dark paper does not soften the order.</span>
           </figcaption>
           <div class="pop">
             <div class="pop-head">
@@ -2016,14 +2221,14 @@
                 <div class="rows">
                   <div class="row">
                     <div class="row-top">
-                      <span class="pct">51%</span>
+                      <span class="pct">40%</span>
                       <span class="wlabel">Session (5h)</span>
                       <span class="spacer"></span>
                       <span class="reset">resets in 4h 12m</span>
                       <span class="dotsep">·</span>
-                      <span class="used">49% used</span>
+                      <span class="used">60% used</span>
                     </div>
-                    <div class="meter"><span class="fill" style="width:51%"></span><span class="notch"></span></div>
+                    <div class="meter"><span class="fill" style="width:40%"></span><span class="notch"></span></div>
                   </div>
                   <div class="row">
                     <div class="row-top">
@@ -2048,14 +2253,14 @@
                 <div class="rows">
                   <div class="row">
                     <div class="row-top">
-                      <span class="pct">41%</span>
+                      <span class="pct">24%</span>
                       <span class="wlabel">Rolling</span>
                       <span class="spacer"></span>
                       <span class="reset muted">~ resets in 5h</span>
                       <span class="dotsep">·</span>
-                      <span class="used">59% used</span>
+                      <span class="used">76% used</span>
                     </div>
-                    <div class="meter"><span class="fill" style="width:41%"></span><span class="notch"></span></div>
+                    <div class="meter"><span class="fill" style="width:24%"></span><span class="notch"></span></div>
                   </div>
                   <div class="row">
                     <div class="row-top">
@@ -2079,6 +2284,41 @@
                     </div>
                     <div class="meter"><span class="fill" style="width:26%"></span><span class="notch"></span></div>
                   </div>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-head">
+                  <svg class="prov"><use href="#i-lift"/></svg>
+                  <span class="prov-name">Antigravity</span>
+                  <span class="spacer"></span>
+                </div>
+                <div class="rows">
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">88%</span>
+                      <span class="wlabel">5-hour</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 3h 05m</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">12% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                  </div>
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">73%</span>
+                      <span class="wlabel">Weekly</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 5d 21h</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">27% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:73%"></span><span class="notch"></span></div>
+                  </div>
+                </div>
+                <div class="card-foot">
+                  <svg class="icon"><use href="#i-code"/></svg>
+                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
                 </div>
               </article>
 
@@ -2226,6 +2466,41 @@
                   </div>
                 </div>
               </article>
+              <article class="card">
+                <div class="card-head">
+                  <svg class="prov"><use href="#i-lift"/></svg>
+                  <span class="prov-name">Antigravity</span>
+                  <span class="spacer"></span>
+                </div>
+                <div class="rows">
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">88%</span>
+                      <span class="wlabel">5-hour</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 3h 05m</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">12% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                  </div>
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">73%</span>
+                      <span class="wlabel">Weekly</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 5d 21h</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">27% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:73%"></span><span class="notch"></span></div>
+                  </div>
+                </div>
+                <div class="card-foot">
+                  <svg class="icon"><use href="#i-code"/></svg>
+                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                </div>
+              </article>
 
             </div>
             <div class="divider"></div>
@@ -2243,7 +2518,7 @@
           <figcaption>
             <span class="spec-no">09</span>
             <span class="spec-name">Three refusals</span>
-            <span class="spec-note">Limited, error, no plan. Retained values are dated; a missing plan is named, not zeroed.</span>
+            <span class="spec-note">Limited, error, no plan — and a fourth card that keeps reporting. Retained values are dated; a missing plan is named, not zeroed.</span>
           </figcaption>
           <div class="pop">
             <div class="pop-head">
@@ -2330,7 +2605,7 @@
                 </div>
                 <div class="card-foot">
                   <svg class="icon"><use href="#i-warning"/></svg>
-                  <span>Couldn't refresh (http-500) · showing values from 12m ago.</span>
+                  <span>Couldn't refresh (http-500) · values from 12m ago.</span>
                 </div>
               </article>
 
@@ -2347,6 +2622,41 @@
                     <div class="state-title">This key has no Go plan</div>
                     <div class="state-body">The key is valid, but there's no subscription attached to it.</div>
                   </div>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-head">
+                  <svg class="prov"><use href="#i-lift"/></svg>
+                  <span class="prov-name">Antigravity</span>
+                  <span class="spacer"></span>
+                </div>
+                <div class="rows">
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">88%</span>
+                      <span class="wlabel">5-hour</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 3h 05m</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">12% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                  </div>
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">73%</span>
+                      <span class="wlabel">Weekly</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 5d 21h</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">27% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:73%"></span><span class="notch"></span></div>
+                  </div>
+                </div>
+                <div class="card-foot">
+                  <svg class="icon"><use href="#i-code"/></svg>
+                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
                 </div>
               </article>
 
@@ -2366,7 +2676,7 @@
           <figcaption>
             <span class="spec-no">10</span>
             <span class="spec-name">Thresholds</span>
-            <span class="spec-note">Amber and red stay inside the meter and the triangle. The number and the word LOW carry the meaning.</span>
+            <span class="spec-note">Amber and red stay inside the meter and the triangle. The number and the word LOW carry the meaning. Antigravity’s free tier reports weekly only, so its card carries one row.</span>
           </figcaption>
           <div class="pop">
             <div class="pop-head">
@@ -2488,6 +2798,31 @@
                     </div>
                     <div class="meter"><span class="fill" style="width:26%"></span><span class="notch"></span></div>
                   </div>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-head">
+                  <svg class="prov"><use href="#i-lift"/></svg>
+                  <span class="prov-name">Antigravity</span>
+                  <span class="plan">Free</span>
+                  <span class="spacer"></span>
+                </div>
+                <div class="rows">
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">88%</span>
+                      <span class="wlabel">Weekly</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 5d 21h</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">12% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                  </div>
+                </div>
+                <div class="card-foot">
+                  <svg class="icon"><use href="#i-code"/></svg>
+                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
                 </div>
               </article>
 
@@ -2613,6 +2948,41 @@
                   </div>
                 </div>
               </article>
+              <article class="card">
+                <div class="card-head">
+                  <svg class="prov"><use href="#i-lift"/></svg>
+                  <span class="prov-name">Antigravity</span>
+                  <span class="spacer"></span>
+                </div>
+                <div class="rows">
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">88%</span>
+                      <span class="wlabel">5-hour</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 3h 05m</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">12% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:88%"></span><span class="notch"></span></div>
+                  </div>
+                  <div class="row">
+                    <div class="row-top">
+                      <span class="pct">73%</span>
+                      <span class="wlabel">Weekly</span>
+                      <span class="spacer"></span>
+                      <span class="reset">resets in 5d 21h</span>
+                      <span class="dotsep">·</span>
+                      <span class="used">27% used</span>
+                    </div>
+                    <div class="meter"><span class="fill" style="width:73%"></span><span class="notch"></span></div>
+                  </div>
+                </div>
+                <div class="card-foot">
+                  <svg class="icon"><use href="#i-code"/></svg>
+                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                </div>
+              </article>
 
             </div>
             <div class="divider"></div>
@@ -2644,7 +3014,7 @@
               </div>
 
               <h2 class="onboard-hero">See the wall<br>before you hit it.</h2>
-              <p class="onboard-sub">Remaining usage for Claude Code, Codex, and OpenCode Go — in your menu bar.</p>
+              <p class="onboard-sub">Remaining usage for Claude Code, Codex, OpenCode Go, and Antigravity — in your menu bar.</p>
 
               <div class="privacy">
                 <div class="privacy-row">
@@ -2657,7 +3027,7 @@
                 </div>
                 <div class="privacy-row">
                   <div class="privacy-icon"><svg class="icon"><use href="#i-eye-off"/></svg></div>
-                  <div><div class="privacy-title">No telemetry</div><div class="privacy-detail">Nothing is uploaded. Requests go only to the three providers.</div></div>
+                  <div><div class="privacy-title">No telemetry</div><div class="privacy-detail">Nothing is uploaded. Only the CLIs and APIs you enable are contacted.</div></div>
                 </div>
               </div>
 
@@ -2689,7 +3059,7 @@
     <div class="section-head">
       <span class="num">04</span>
       <h2>Notes</h2>
-      <p>Why the artifact looks like this, in four decisions that are easy to undo by accident.</p>
+      <p>Why the artifact looks like this, in five decisions that are easy to undo by accident.</p>
     </div>
     <div class="notes">
       <div class="note">
@@ -2707,6 +3077,10 @@
       <div class="note">
         <h3>Consent is a control, not a modal</h3>
         <p>Claude's login read is off, explained in one sentence, and attached to a CTA that works without it. No pre-checked box, no "recommended", no second prompt after dismissal.</p>
+      </div>
+      <div class="note wide">
+        <h3>Four providers, one reading</h3>
+        <p>Claude Code, Codex and OpenCode Go report a <em>used</em> percentage; Antigravity reports a <em>remaining</em> fraction (0–1). All four are normalised to the same reading — remaining percent, floored — so the eye never has to invert anything and no provider gets its own layout. The differences are confined, not hidden: Antigravity's card carries a last line naming its source, a local <span class="k">agy</span> run, so it cannot be mistaken for a network call and never implies a Google credential is read. It is also the only card that says "opt-in".</p>
       </div>
     </div>
   </section>

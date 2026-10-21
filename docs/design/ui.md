@@ -21,7 +21,7 @@ no tabs, no charts, no scrolling by default.
 one signal colour. System type, hairline structure, tabular numbers, nothing decorative
 that is not also information.
 
-## 2. Layout (340 × ~460–520 pt, content-sized)
+## 2. Layout (340 × ~510–680 pt, content-sized)
 
 ```
 ┌──────────────────────────────────────────────┐ 340
@@ -37,6 +37,7 @@ that is not also information.
 │ └────────────────────────────────────────────┘│
 │ ┌ Codex … ┐                                   │
 │ ┌ Go …    ┐                                   │
+│ ┌ Antigravity, only if on ┐                   │
 ├──────────────────────────────────────────────┤
 │ 🔒 Read-only · no telemetry            Quit  │  footer, 26
 └──────────────────────────────────────────────┘
@@ -44,9 +45,11 @@ that is not also information.
 
 - Width is fixed at **340 pt** so the popover does not resize when a plan badge or a
   status word changes.
-- Height is content-sized. A healthy three-provider popover is ~470 pt; a card with a
-  long unavailable explanation can push it to ~560 pt. No `ScrollView` in v1 — with three
-  providers and at most three windows each, the content always fits a 900 pt display.
+- Height is content-sized. Measured in the mock: a healthy **four-provider** popover is
+  ~646 pt, the tallest state (one stale card, which adds a footer line) ~678 pt, first run
+  ~510 pt. All of it still fits a 900 pt display, so v1 keeps no `ScrollView` — four
+  providers with at most three windows each is the ceiling the layout is designed for.
+  Antigravity is opt-in: a stock install is one card shorter than the diagram.
 - Cards are 11 pt-radius panels with a 4.5% primary tint and a 1 pt hairline. No nested
   materials: the popover's own vibrancy is the background.
 
@@ -124,6 +127,7 @@ value shown by the label, not the popover.
 | **unsupported** | endpoint not available for the account | "Not available for this account." | omitted |
 | **error(code)** | 5xx, decoding, network, Keychain | "Couldn't read usage (http-500). It will retry automatically."; with last-good: rows + footer | omitted |
 | **Claude opt-out** | `claudeOAuthReadEnabled == false` | "Local logs only" + explanation + "Turn on in Settings" | Claude omitted |
+| **Antigravity off** | provider off — **the default** | card hidden; Settings lists it as opt-in | Antigravity omitted |
 | **loading** | no snapshot yet | spinner + "Checking…" (never a skeleton number) | omitted |
 | **first run** | `hasCompletedOnboarding == false` | full onboarding screen (below) | gauge icon only |
 | **all hidden** | every provider disabled | "All cards are hidden" + Settings | gauge icon only |
@@ -139,16 +143,23 @@ Styles (Settings → Menu bar → Label):
 
 | Style | Example | Purpose |
 |---|---|---|
-| Letters + numbers | `C 62% · O 51% · G 41%` | default; predictable positions |
-| Icons + numbers | `✦ 62% · ‹/› 51% · ⚡ 41%` | compact, language-neutral |
-| Compact | `✦ 41%` | provider glyph + **lowest** remaining; for crowded bars |
-| Lowest provider only | `G 41%` | worst provider + its letter |
+| Letters + numbers | `C 62% · O 40% · G 24% · A 88%` | default; predictable positions |
+| Icons + numbers | `✦ 62% · ‹/› 40% · ⚡ 24% · ◌ 88%` | same information, no letters |
+| Compact | `‹/› 40% · ⚡ 24%` | glyph + the **two lowest**; the safety valve when the bar is already crowded |
+| Lowest provider only | `G 24%` | worst provider + its letter |
 
-- Provider order is fixed (`Claude`, `Codex`, `Go`), not sorted by urgency, so positions
-  stay learnable. Given up: if macOS truncates from the right, the last card disappears
-  first. Compact mode is the documented answer to a crowded bar; we do not measure the
-  menu bar width.
+- Provider order is fixed (`Claude`, `Codex`, `Go`, `Antigravity`), not sorted by urgency,
+  so positions stay learnable. Given up: if macOS truncates from the right, the last
+  provider disappears first — with four labels that last one is Antigravity, which is also
+  the one that is off by default.
+- Four providers do not break the label at specimen width: letters + numbers measures
+  ~198 pt with ~173 pt of slack before the clock, and the critical row (triangle + four
+  numbers) ~197 pt. Where four really is too much is a real bar that already holds other
+  items; compact degrades by intent — glyph + the **two lowest**, not the whole set. We
+  still do not measure the real menu bar width.
 - No data → gauge icon only (`◔`), never `0%`.
+- Antigravity's mark (`◌`) is a ball held above a lift pad, drawn at the same stroke weight
+  as the other provider glyphs so it still reads at 12 pt next to the system icons.
 - Any value below 5% adds a small warning triangle before the numbers.
 - `~` prefix marks a last-known value; the accessibility label says "approximately".
 - Tooltips are not used in the menu bar (macOS does not reliably show them there).
@@ -182,6 +193,10 @@ The first run replaces the popover contents with one screen (no modal, no tour):
 4. Primary action **Start monitoring** — always enabled, independent of the toggle.
    No pre-checked consent, no "recommended", no nagging. The CTA does not require the
    privacy-hostile option to be enabled.
+
+Antigravity is not part of onboarding. It ships off, its card states `opt-in` in the
+provenance line, and Settings is the only place it is turned on — no second consent screen,
+no prompt on first run.
 
 Persistence: `UserDefaults` key **`claudeOAuthReadEnabled`** (default `false`), plus
 `hasCompletedOnboarding`. Until onboarding is complete, no provider is polled and the menu
