@@ -7,7 +7,7 @@
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
     "version": "0.1.0",
     "license": "MIT",
-    "commits": 20,
+    "commits": 22,
     "branch": "main",
     "pushed": true,
     "issues": 8,
@@ -15,7 +15,9 @@
       "v0.2.0 — MVP hardening",
       "v0.3.0 — distribution"
     ],
-    "ci": "green (Swift 6.0 / 6.2)"
+    "ci": "green (Swift 6.0 / 6.2)",
+    "issues_closed": 5,
+    "issues_open": 3
   },
   "stats": [
     {
@@ -456,6 +458,10 @@
     {
       "date": "2026-10-21",
       "text": "스냅샷 히스토리 코어 추가 — `history.json` (버전드 payload, 시리즈별 상한·7일 보존, 원자적 쓰기). 테스트 109개"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "카드별 7일 스파크라인 UI 추가 (#7 종료) — 0~1 고정 도메인, 샘플 2개 미만이면 미표시, VoiceOver 추세 문장"
     }
   ]
 }
