@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege: CI only reads the repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Swift ${{ matrix.swift }}
+    # macos-15 ships Xcode 16 (`swift test` works out of the box).
+    # If macos-15 is not available on your plan, change this to macos-14.
+    runs-on: macos-15
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ['6.0', '6.2']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Swift ${{ matrix.swift }}
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: ${{ matrix.swift }}
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Build
+        run: swift build -v
+
+      - name: Test
+        run: swift test --parallel
+
+      # ---------------------------------------------------------------------
+      # Guard: no hardcoded credentials may reach Sources/.
+      # Shapes covered: Anthropic keys (sk-ant-*), OpenCode keys (oc_sk_*),
+      # OpenAI keys (sk-*, sk-proj-*), and raw JWTs (eyJ...).
+      # ---------------------------------------------------------------------
+      - name: Guard - no hardcoded tokens in Sources/
+        run: |
+          set -euo pipefail
+          if [ ! -d Sources ]; then
+            echo "Sources/ not present yet - skipping token guard."
+            exit 0
+          fi
+          pattern='(sk-ant-[A-Za-z0-9_-]{8,}|oc_sk_[A-Za-z0-9_-]{8,}|sk-(proj-)?[A-Za-z0-9]{20,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.)'
+          if matches=$(grep -rnE "$pattern" Sources); then
+            echo "::error::Possible hardcoded credential found in Sources/."
+            # Print file:line only - never echo the matched secret.
+            printf '%s\n' "$matches" | cut -d: -f1,2
+            exit 1
+          fi
+
+      # ---------------------------------------------------------------------
+      # Guard: network access is restricted to the compiled-in allowlist.
+      #
+      # ALLOWED HOSTS (keep in sync with the allowlist constant in
+      # Sources/UsageCore/Net/):
+      #   api.anthropic.com   - Claude Code usage endpoint
+      #   chatgpt.com         - Codex usage fallback endpoint
+      #   opencode.ai         - OpenCode Go usage endpoint
+      #
+      # Any other host - including documentation URLs - must not appear in
+      # Sources/. Adding a host is a separate PR that updates both this list
+      # and the allowlist constant.
+      # ---------------------------------------------------------------------
+      - name: Guard - domain allowlist
+        run: |
+          set -euo pipefail
+          if [ ! -d Sources ]; then
+            echo "Sources/ not present yet - skipping allowlist guard."
+            exit 0
+          fi
+          # Extract the host and compare it exactly, so `api.anthropic.com.evil.tld`
+          # cannot slip past a substring match.
+          offenders=$(grep -rnoE 'https?://[A-Za-z0-9._-]+' Sources | awk '{
+              url = $0
+              sub(/^[^:]+:[0-9]+:/, "", url)
+              sub(/^https?:\/\//, "", url)
+              if (url !~ /^(api\.anthropic\.com|chatgpt\.com|opencode\.ai)$/) print $0
+            }')
+          if [ -n "$offenders" ]; then
+            echo "::error::URL outside the domain allowlist found in Sources/:"
+            printf '%s\n' "$offenders"
+            exit 1
+          fi
+          echo "All URLs in Sources/ are on the allowlist."

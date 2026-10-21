@@ -1,0 +1,67 @@
+# XcodeGen spec — the source of truth for the app project.
+#
+#   brew install xcodegen
+#   xcodegen generate
+#   xcodebuild -scheme Fillline -configuration Debug build
+#
+# `Fillline.xcodeproj` is generated and gitignored. Never commit it.
+name: Fillline
+
+options:
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+packages:
+  # The root SwiftPM package. Its library product is `UsageCore`, which the app links.
+  UsageCore:
+    path: .
+
+targets:
+  Fillline:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      # Sources/UsageApp is created in Phase 1 (SwiftUI @main, MenuBarExtra, popover).
+      - path: Sources/UsageApp
+        optional: true
+    dependencies:
+      - package: UsageCore
+        product: UsageCore
+    settings:
+      base:
+        PRODUCT_NAME: Fillline
+        PRODUCT_BUNDLE_IDENTIFIER: dev.ies0411.fillline
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        ENABLE_HARDENED_RUNTIME: "YES"
+        CODE_SIGN_STYLE: Automatic
+        # Intentionally unsandboxed: the app reads ~/.claude, ~/.codex, ~/.config/opencode
+        # and pre-existing Keychain items owned by other CLIs. This is why it is distributed
+        # outside the Mac App Store. See README "Privacy".
+        ENABLE_APP_SANDBOX: "NO"
+        GENERATE_INFOPLIST_FILE: "YES"
+        INFOPLIST_KEY_LSUIElement: "YES"
+        INFOPLIST_KEY_CFBundleDisplayName: Fillline
+        INFOPLIST_KEY_NSHumanReadableCopyright: "MIT Licensed. Not affiliated with Anthropic, OpenAI, or OpenCode."
+        COMBINE_HIDPI_IMAGES: "YES"
+        DEAD_CODE_STRIPPING: "YES"
+    # entitlements:
+    #   None. The app needs no hardened-runtime exceptions and must NOT be sandboxed.
+    #   If one is ever unavoidable, commit a dedicated plist and reference it here:
+    #     CODE_SIGN_ENTITLEMENTS: Resources/Fillline.entitlements
+    #   Do not add com.apple.security.network.client style sandbox entitlements — they are
+    #   meaningless while ENABLE_APP_SANDBOX is NO, and misleading if it is ever flipped.
+
+schemes:
+  Fillline:
+    build:
+      targets:
+        Fillline: all
+    run:
+      config: Debug
+    archive:
+      config: Release

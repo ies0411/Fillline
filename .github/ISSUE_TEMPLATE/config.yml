@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability (private)
+    url: https://github.com/ies0411/Fillline/security/advisories/new
+    about: Do not open a public issue for credential leaks or allowlist bypasses. See SECURITY.md.
+  - name: Question or idea
+    url: https://github.com/ies0411/Fillline/discussions
+    about: Usage questions, feature ideas, and "is this normal?" belong in Discussions.
+  - name: Read the privacy and unofficial-endpoint notes first
+    url: https://github.com/ies0411/Fillline#unofficial-and-what-that-means
+    about: Quota values being wrong or stale is a bug; provider ToS risk is disclosed in the README.

@@ -1,0 +1,79 @@
+name: Bug report
+description: Something in the app is broken that is not a provider endpoint change.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not paste tokens, cookies, emails, org IDs, or full session logs.**
+        Redact anything that identifies you or authorizes a request. If you are unsure,
+        open a blank issue and ask first. Security issues go through SECURITY.md, not here.
+  - type: input
+    id: version
+    attributes:
+      label: App version / commit
+      placeholder: "0.1.0 (abc1234)"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "14.6 / 15.1 / 26.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Which provider card is affected?
+      multiple: true
+      options:
+        - Claude Code
+        - OpenAI Codex
+        - OpenCode Go
+        - Menu bar label / popover
+        - Notifications
+        - Settings
+        - Build or install
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Launch the app
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: state
+    attributes:
+      label: Card status shown
+      description: One of ok / stale / needs login / rate limited / not installed / unsupported.
+      placeholder: "stale · 12m ago"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs (redacted)
+      description: |
+        Console.app filtered by the app's subsystem, or nothing. Credentials are logged as
+        `<private>` by design, so there is rarely anything useful here.
+      render: text
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I have removed all tokens, cookies, emails, and account/org IDs from this report.
+          required: true
+        - label: This is not a security vulnerability (those go through SECURITY.md).
+          required: true

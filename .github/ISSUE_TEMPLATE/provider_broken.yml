@@ -1,0 +1,79 @@
+name: Provider broken
+description: A usage endpoint changed shape, started failing, or returns nonsense. No secrets.
+title: "[provider] "
+labels: ["provider-broken"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        These endpoints are undocumented and break without warning. A useful report has the
+        **shape** of the response, not its values.
+
+        **Never paste a token, `Authorization` header, cookie, email, or account/org ID.**
+        Replace every value with `<redacted>` before submitting. All three providers return
+        `percent`/`utilization` as a 0-100 *used* value; if you report the number, say which
+        field it came from, not the raw payload.
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider
+      options:
+        - Claude Code (api.anthropic.com/api/oauth/usage)
+        - OpenAI Codex (codex app-server account/rateLimits/read)
+        - OpenAI Codex (chatgpt.com/backend-api/wham/usage fallback)
+        - OpenCode Go (opencode.ai/zen/go/v1/usage)
+    validations:
+      required: true
+  - type: dropdown
+    id: failure
+    attributes:
+      label: What kind of failure?
+      options:
+        - HTTP error (401 / 403 / 404 / 429 / 5xx)
+        - Response parses but values are wrong (e.g. always 100%, or negative)
+        - Missing window (session / weekly / monthly / rolling)
+        - Reset time is wrong or in the past
+        - Request times out or connection fails
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: status
+    attributes:
+      label: HTTP status or RPC error code (if any)
+      placeholder: "403"
+  - type: input
+    id: version
+    attributes:
+      label: App version / commit
+      placeholder: "0.1.0 (abc1234)"
+    validations:
+      required: true
+  - type: textarea
+    id: shape
+    attributes:
+      label: Response shape (values removed)
+      description: |
+        Paste the JSON with every value replaced by `<redacted>`, or describe the keys and
+        their types. Field names, nesting, and nullability are what matter.
+      render: json
+      placeholder: |
+        {
+          "five_hour": { "utilization": 0, "resets_at": "<redacted ISO8601>" },
+          "seven_day": null
+        }
+  - type: textarea
+    id: cli-version
+    attributes:
+      label: CLI version
+      description: Output of `claude --version`, `codex --version`, or `opencode --version`.
+      placeholder: "claude 2.1.80"
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I removed all tokens, cookies, emails, and account/org IDs from this report.
+          required: true
+        - label: I understand this endpoint is undocumented and may stay broken until upstream changes or a patch lands.
+          required: true
