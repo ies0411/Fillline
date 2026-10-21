@@ -7,14 +7,15 @@
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
     "version": "0.1.0",
     "license": "MIT",
-    "commits": 6,
+    "commits": 12,
     "branch": "main",
     "pushed": true,
     "issues": 8,
     "milestones": [
       "v0.2.0 — MVP hardening",
       "v0.3.0 — distribution"
-    ]
+    ],
+    "ci": "green (Swift 6.0 / 6.2)"
   },
   "stats": [
     {
@@ -416,6 +417,10 @@
     {
       "date": "2026-10-21",
       "text": "`docs/product-ops.md` 추가 — 브랜치/라벨/릴리스/provider 파손 런북, AGENTS §7.2로 규칙화"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "CI 그린 — Swift 6.0·6.2 두 매트릭스 모두 success. allowlist 가드가 링크 전용 `github.com`을 오탐하던 문제 수정(`c15043d`)"
     }
   ]
 }
