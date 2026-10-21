@@ -24,8 +24,11 @@ broken parser ships as a patch release.
 - `SnapshotHistory` in `UsageCore`: bounded per-provider/window sample history (7-day
   retention, 720 points per series, newest kept) written atomically to `history.json`.
   Estimated and placeholder windows are never recorded, duplicate `capturedAt` values are
-  rejected, and a corrupt file reads as an empty history. Storage only — the sparkline UI
-  is not wired yet (issue #7, core half).
+  rejected, and a corrupt file reads as an empty history. Storage only; the card sparkline
+  consumes it.
+- Seven-day sparkline on each provider card: remaining fraction for the card's longest-horizon
+  window, fixed `0…1` domain, no axes or legend, hidden until two samples exist. The trail is
+  spoken to VoiceOver as a trend sentence rather than hidden as decoration.
 
 ## [0.1.0-alpha.1] — 2026-10-21
 

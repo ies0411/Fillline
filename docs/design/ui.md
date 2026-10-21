@@ -21,7 +21,7 @@ no tabs, no charts, no scrolling by default.
 one signal colour. System type, hairline structure, tabular numbers, nothing decorative
 that is not also information.
 
-## 2. Layout (340 × ~510–680 pt, content-sized)
+## 2. Layout (340 × ~510–790 pt, content-sized)
 
 ```
 ┌──────────────────────────────────────────────┐ 340
@@ -32,6 +32,7 @@ that is not also information.
 │ │ ████████████████████████▏──────────         │  meter + 15% notch
 │ │ 80%  WEEKLY         resets in 3d 2h · 20% used│
 │ │ ██████████████████▏───────────────          │
+│ │ ╱────────────────────────────────────────  │  trail, 20 pt (§12)
 │ │ ─────────────────────────────────────────  │
 │ │ ◷ Stale · 4m ago — showing last known values│
 │ └────────────────────────────────────────────┘│
@@ -50,6 +51,8 @@ that is not also information.
   ~510 pt. All of it still fits a 900 pt display, so v1 keeps no `ScrollView` — four
   providers with at most three windows each is the ceiling the layout is designed for.
   Antigravity is opt-in: a stock install is one card shorter than the diagram.
+  These measurements **predate the sparkline** (§12): it adds ~29 pt per card, so the healthy
+  four-provider state is now ~754 pt and the tallest ~786 pt, still inside the ceiling.
 - Cards are 11 pt-radius panels with a 4.5% primary tint and a 1 pt hairline. No nested
   materials: the popover's own vibrancy is the background.
 
@@ -248,7 +251,123 @@ no pulsing badges, no looping decoration.
 - Body text uses `.secondary` on the popover material; tertiary is reserved for separators
   and decorative ticks.
 
-## 12. What is not verified until Xcode
+## 12. Sparkline — the seven-day trail
+
+Added for issue #7. Source: `SnapshotHistory` (`Sources/UsageCore/Storage`), drawn by
+`Views/Sparkline.swift`, fed by `AppModel.sparklines`. On for every card; it has no settings
+toggle.
+
+### 12.1 What it is
+
+One line per card, under the windows, plotting the **remaining** fraction of that card's
+long-horizon window over the last seven days — oldest at the left edge, `now` at the right.
+It answers the question the numbers cannot: *is this heading for the wall, and how fast?*
+The big number says where you are; the line says which way it is going.
+
+### 12.2 Placement and size
+
+| Item | Value |
+|---|---|
+| Width | full card content width (292 pt of the 340 pt popover) |
+| Height | 20 pt, including 2.5 pt of padding above and below the line |
+| Position | directly under the window rows, above any status footer |
+| Gap | 9 pt (the card's existing row spacing) |
+| Card growth | ~29 pt per card; four providers ≈ +116 pt |
+
+**Full width, not right-aligned.** Three reasons:
+
+1. It continues a column. Number → label → meter → trail all share the same left and right
+   edges, so the card reads as one instrument instead of a graphic parked in a corner.
+2. A seven-day axis needs the width. A 90 pt stub would compress a week to ~3 pt per day and
+   turn every slope into a staircase.
+3. Right-aligning puts it under the countdown, not under the meter whose history it is, which
+   is exactly the association the line exists to make.
+
+It gets no divider, caption, background or extra padding beyond the table above. It is a
+footnote to the numbers, not a second chart.
+
+### 12.3 Quantities
+
+- **Y — remaining, fixed to `0...1`.** Same domain as the meter, never auto-scaled: the top of
+  the box is a full quota, the bottom is the wall, and the line's height means the same thing
+  on every card. A floating `min...max` domain would draw nearly every healthy card as an
+  identical full-height ramp and would turn a two-point wobble into a cliff.
+- **X — time-true.** The 168 hours ending at `now`; each sample sits at its real position and
+  is never stretched to fill the box. A card running for three days draws three days starting
+  from the middle; a card with ten minutes of history draws a stub at the right edge and
+  grows leftward. The empty left side is honest "no history yet", not missing data.
+- **Series — the card's long-horizon window.** Weekly first, then model-scoped weekly,
+  monthly, rolling, 5-hour, credits. The weekly window shares the axis's timescale and gives
+  one readable slope; a 5-hour window would draw ~30 sawtooth cycles across the same axis and
+  become the loudest thing on screen. Cards without a weekly window (Go's monthly,
+  Antigravity's group, a Codex window of unknown duration) use the longest they have.
+- **No caption names the window** — see §12.6 for why that trade-off is accepted.
+
+### 12.4 Ink
+
+- One line: **1.15 pt**, round caps and joins, `primary` at 45 % when the plotted window is
+  healthy — the same ink as the meter fill, one step quieter.
+- One area fill under the line at 10 % of that colour (≈4.5 % effective when healthy). With
+  the fixed domain it is what carries the *level*: a card that has spent 20 points shows a
+  visibly emptier box even though the stroke itself only moves 3–4 pt.
+- **Warning (< 15 % remaining) and critical (< 5 %)** switch the line and the fill to the
+  card's existing amber/red. No new hue is introduced, and the colour comes from the plotted
+  window's newest sample, so a card can never show a grey line above an amber meter.
+- Nothing else: no axis, gridlines, legend, markers, gradient or animation. Points arrive
+  when the next poll lands, exactly like the meters.
+
+### 12.5 Not enough data
+
+| Samples in the window | Rendering |
+|---|---|
+| 0–1 | **nothing at all** — no element, and no space reserved in the card |
+| 2–3 | the real polyline: one or two segments, at their true x positions |
+| many | the same rule, more segments |
+
+Never a flat line, never a placeholder box, never upsampled or interpolated points. A card
+with two samples an hour apart draws a two-pixel stub, because that is the truthful drawing
+of what is known; it lengthens by itself.
+
+### 12.6 Accessibility
+
+The sparkline is **its own accessibility element, not decoration**. The card's text states the
+current remaining, the used percentage and the reset time, but it says nothing about direction
+or rate — which is precisely what the line adds. Hiding it would withhold information from
+VoiceOver users only. The label is a sentence:
+
+> "Weekly remaining trend over the last 3 days 4 hours, down 12 points, now 80 %"
+
+- Direction and distance are rounded to whole points; anything inside ±1 point reads "steady".
+- The period is measured from the **oldest sample**, so a young series is described in minutes
+  and never claims seven days of history it does not have.
+- The window's own label is the only thing that identifies *which* series is drawn. That is
+  the accepted cost of having no visible caption: adding one ("7d · weekly") would sit in the
+  same visual band as the meter's own labels and start competing with them. VoiceOver gets the
+  full sentence; sighted users read the line as the trail of the window above it.
+- No hover state, no tooltip, no interaction.
+
+### 12.7 Light and dark
+
+Both appearances were rendered offscreen (`ImageRenderer`, the same approach the card mock was
+checked with) at the real 292 pt width, in healthy, warning, critical, partial-history and
+two-sample states. The healthy ink is `Color.primary` at a fixed alpha, so it inverts with the
+appearance rather than being a hardcoded grey; the fill is the same colour at low alpha, so it
+always stays *behind* the line. Amber and red are the system dynamic colours the meter already
+uses. Two things the render changed: the plot gained 2.5 pt of vertical padding (without it a
+healthy line hugged the box's top edge and read as a rule under the meter), and the fill and
+stroke were lightened from 16 %/50 % to 10 %/45 % because a full-height low-alpha block was
+competing with the meter bar.
+
+### 12.8 Known limits
+
+- `popover-mock.html` predates this section and still shows the four cards without sparklines.
+  It stays frozen as the specimen for everything else; §12.2 carries the updated heights.
+- Turning Claude's credential read off clears the card and its in-memory trail, but
+  `SnapshotHistory` has no per-provider clear, so Claude samples already on disk stay in
+  `history.json` until the seven-day retention prunes them.
+- The menu bar shows no trend, and there is no setting to hide the sparkline.
+
+## 13. What is not verified until Xcode
 
 - `MenuBarExtra` label `.task { model.start() }` is assumed to run at launch. If it does
   not, the first poll would wait until the popover opens; the fix is a minimal app
@@ -257,7 +376,11 @@ no pulsing badges, no looping decoration.
 - True vibrancy/contrast of `.secondary` on the popover material, and macOS menu bar
   truncation behaviour.
 - `@Bindable` bindings and `TimelineView` redraw cadence at runtime.
+- The sparkline's `Canvas` inside a `.window` `MenuBarExtra`: stroke crispness of a 1.15 pt
+  line on a non-Retina display, and whether the 10% area fill still reads against the
+  popover's vibrancy rather than the solid background used for the offscreen check (§12.7).
 - App bundle build, signing, and the Keychain prompt path (requires Xcode).
 
-The HTML mock is the visual contract; any change to the SwiftUI layout should be reflected
-there first.
+The HTML mock is the visual contract for the four-provider layout; any change to that layout
+should be reflected there first. The sparkline (§12) is the one documented exception: the mock
+is frozen and predates it, so §12.2 carries its measurements instead.

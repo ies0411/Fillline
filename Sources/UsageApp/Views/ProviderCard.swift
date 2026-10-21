@@ -10,6 +10,10 @@ struct ProviderCard: View {
     let isClaudeOAuthReadEnabled: Bool
     let now: Date
 
+    /// The history trail is ambient per-provider state owned by the model, not something the
+    /// popover threads through. Reading it here keeps the card's initialiser unchanged.
+    @Environment(AppModel.self) private var model
+
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
             header
@@ -18,6 +22,7 @@ struct ProviderCard: View {
                 localOnlyState
             } else if let snapshot, !snapshot.windows.isEmpty {
                 windows(snapshot)
+                sparkline
                 if snapshot.status.isFailure {
                     StatusFooter(snapshot: snapshot, now: now)
                 }
@@ -100,6 +105,15 @@ struct ProviderCard: View {
             ForEach(snapshot.windows) { window in
                 WindowRow(window: window, now: now)
             }
+        }
+    }
+
+    /// Full width, directly under the meters it continues. It contributes no height at all
+    /// until two samples exist (docs/design/ui.md §12).
+    @ViewBuilder
+    private var sparkline: some View {
+        if let data = model.sparkline(for: provider), data.samples.count >= 2 {
+            Sparkline(data: data, now: now)
         }
     }
 

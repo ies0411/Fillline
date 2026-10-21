@@ -101,6 +101,11 @@ final class AppModel {
     private(set) var isRefreshing = false
     private(set) var lastAttemptAt: [ProviderID: Date] = [:]
 
+    /// The trail behind each card's numbers, refreshed after every poll pass. Kept in step
+    /// with `snapshots`: a provider with no displayable window has no entry here, so a card
+    /// can never show a line for a window it is not showing.
+    private(set) var sparklines: [ProviderID: SparklineData] = [:]
+
     // MARK: Settings (persisted)
 
     var claudeOAuthReadEnabled: Bool {
@@ -173,6 +178,8 @@ final class AppModel {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let cache: SnapshotCache
+    /// The trail behind `snapshots`. Writes are best-effort and never throw (AGENTS §3).
+    @ObservationIgnored private let history: SnapshotHistory
     @ObservationIgnored private let notifier: any NotificationDelivering
     @ObservationIgnored private let notificationKeys: NotificationKeyStore
     /// Stateless and `Sendable`; the deciding rules live in `UsageCore` so they are tested
@@ -197,6 +204,7 @@ final class AppModel {
     ) {
         self.defaults = defaults
         self.cache = SnapshotCache()
+        self.history = SnapshotHistory()
         self.notifier = notifier
         self.notificationKeys = NotificationKeyStore(defaults: defaults)
         self.scheduler = PollScheduler(providers: [], configuration: .init())
@@ -241,6 +249,14 @@ final class AppModel {
     func snapshot(for provider: ProviderID) -> UsageSnapshot? {
         guard provider != .claudeCode || claudeOAuthReadEnabled else { return nil }
         return snapshots[provider]
+    }
+
+    /// History trail for one card, or `nil` when that card has nothing to plot. The view
+    /// still applies the "fewer than two samples draws nothing" rule, so a short series is
+    /// returned as-is rather than padded to look meaningful.
+    func sparkline(for provider: ProviderID) -> SparklineData? {
+        guard provider != .claudeCode || claudeOAuthReadEnabled else { return nil }
+        return sparklines[provider]
     }
 
     /// Value shown in the menu bar, after the user's window preference. `nil` means the
@@ -328,6 +344,9 @@ final class AppModel {
         }
 
         rebuildScheduler()
+        // Show the trail from disk before the first request goes out, so a relaunch does not
+        // blank the sparklines for one polling round.
+        await refreshSparklines(for: Array(snapshots.keys))
         await tick()
     }
 
@@ -337,6 +356,7 @@ final class AppModel {
         let now = Date()
 
         var didChange = false
+        var polled: [UsageSnapshot] = []
 
         for provider in pollableProviders {
             if force {
@@ -357,6 +377,7 @@ final class AppModel {
             let before = await scheduler.state(for: provider)?.lastAttemptAt
             if let snapshot = await scheduler.poll(provider, force: force) {
                 apply(snapshot)
+                polled.append(snapshot)
                 didChange = true
             }
             if let after = await scheduler.state(for: provider)?.lastAttemptAt, after != before {
@@ -365,6 +386,9 @@ final class AppModel {
         }
 
         ageSnapshots()
+        if !polled.isEmpty {
+            await recordHistory(polled)
+        }
         if didChange {
             await persist()
         }
@@ -487,6 +511,9 @@ final class AppModel {
     private func clearClaudeData() {
         snapshots[.claudeCode] = nil
         lastAttemptAt[.claudeCode] = nil
+        sparklines[.claudeCode] = nil
+        // The on-disk trail is shared by every provider and has no per-provider clear (the
+        // core API is frozen for #7), so Claude samples age out with the seven-day retention.
         Task { await persist() }
     }
 
@@ -498,6 +525,60 @@ final class AppModel {
         } else {
             try? await cache.save(payload)
         }
+    }
+
+    // MARK: History trail
+
+    /// Appends every snapshot from one poll pass, then republishes the sparklines.
+    ///
+    /// Batching after the pass rather than recording per provider keeps one disk write and
+    /// one view refresh per poll. `SnapshotHistory` itself drops failures, estimates and
+    /// duplicate timestamps, so the model does not pre-filter.
+    private func recordHistory(_ polled: [UsageSnapshot]) async {
+        for snapshot in polled {
+            await history.record(snapshot)
+        }
+        await refreshSparklines(for: polled.map(\.provider))
+    }
+
+    /// Re-reads one series per provider. `since` is the same seven days the line draws, so
+    /// the view never filters or pads the samples it is given.
+    private func refreshSparklines(for providers: [ProviderID]) async {
+        let since = Date().addingTimeInterval(-SparklineData.span)
+        var updated = sparklines
+
+        for provider in providers {
+            guard let snapshot = snapshots[provider],
+                  let window = Self.sparklineWindow(in: snapshot)
+            else {
+                updated[provider] = nil
+                continue
+            }
+
+            let samples = await history.series(for: provider, window: window.kind, since: since)
+            updated[provider] = SparklineData(
+                windowLabel: window.label,
+                samples: samples
+            )
+        }
+
+        sparklines = updated
+    }
+
+    /// The window a card's trail is drawn from: the longest horizon it has, weekly first.
+    ///
+    /// The axis is seven days, so a five-hour window would draw roughly thirty sawtooth
+    /// cycles across it and become the loudest thing in the card. Weekly (or monthly) shares
+    /// the axis's timescale and yields one readable slope.
+    private static let sparklineWindowPreference: [LimitWindow.Kind] = [
+        .weekly7d, .weeklyScoped, .monthly, .rolling, .session5h, .credits
+    ]
+
+    private static func sparklineWindow(in snapshot: UsageSnapshot) -> LimitWindow? {
+        for kind in sparklineWindowPreference {
+            if let window = snapshot.window(kind: kind) { return window }
+        }
+        return snapshot.primaryWindow
     }
 
     // MARK: Notifications
