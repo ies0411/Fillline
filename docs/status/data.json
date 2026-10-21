@@ -7,7 +7,7 @@
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
     "version": "0.1.0",
     "license": "MIT",
-    "commits": 12,
+    "commits": 14,
     "branch": "main",
     "pushed": true,
     "issues": 8,
@@ -421,6 +421,14 @@
     {
       "date": "2026-10-21",
       "text": "CI 그린 — Swift 6.0·6.2 두 매트릭스 모두 success. allowlist 가드가 링크 전용 `github.com`을 오탐하던 문제 수정(`c15043d`)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "`Source.appServer` + `UsageSnapshot.resetCredits` 추가 — Codex 카드가 \"문서화된 경로\"와 남은 리셋 크레딧을 표시 (이슈 #2, #3 종료)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "Codex app-server 미인증 응답(-32600)을 `.needsLogin`으로 매핑하고 HTTP 폴백 중단 — 실측 근거는 이슈 #1 코멘트"
     }
   ]
 }
