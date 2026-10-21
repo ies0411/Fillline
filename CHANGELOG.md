@@ -21,6 +21,11 @@ broken parser ships as a patch release.
   95% or is about to reset, and the app delivers them through `UNUserNotificationCenter`.
   Off by default; permission is requested only when the master toggle is switched on, and
   each window alerts once per reset cycle (deduped across relaunches for 48 h).
+- `SnapshotHistory` in `UsageCore`: bounded per-provider/window sample history (7-day
+  retention, 720 points per series, newest kept) written atomically to `history.json`.
+  Estimated and placeholder windows are never recorded, duplicate `capturedAt` values are
+  rejected, and a corrupt file reads as an empty history. Storage only — the sparkline UI
+  is not wired yet (issue #7, core half).
 
 ## [0.1.0-alpha.1] — 2026-10-21
 
