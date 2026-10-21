@@ -95,7 +95,8 @@ extension ProviderStatus: Codable {
         case .notInstalled:
             self = .notInstalled
         case .rateLimited:
-            self = .rateLimited(retryAfter: try container.decodeIfPresent(TimeInterval.self, forKey: .retryAfter))
+            self = .rateLimited(
+                retryAfter: try container.decodeIfPresent(TimeInterval.self, forKey: .retryAfter))
         case .unsupported:
             self = .unsupported
         case .error:

@@ -103,9 +103,11 @@ struct SettingsView: View {
                     .background(Capsule().fill(Color.primary.opacity(0.06)))
             }
 
-            Text("Compact shows only the lowest value; macOS truncates long labels from the right. A ~ means the number is the last known value.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(
+                "Compact shows only the lowest value; macOS truncates long labels from the right. A ~ means the number is the last known value."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 
@@ -136,14 +138,18 @@ struct SettingsView: View {
         Section("Notifications") {
             Toggle("Alert me before I hit a limit", isOn: enabled)
 
-            Text("Off by default. Alerts fire at 80% and 95% of a window, and shortly before a reset. Each window alerts once per reset cycle.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(
+                "Off by default. Alerts fire at 80% and 95% of a window, and shortly before a reset. Each window alerts once per reset cycle."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
 
             if model.notificationsPermissionDenied {
-                Text("macOS is blocking notifications for Fillline. Allow them in System Settings → Notifications.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    "macOS is blocking notifications for Fillline. Allow them in System Settings → Notifications."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
         }
     }
@@ -155,9 +161,11 @@ struct SettingsView: View {
             Toggle("Read Claude Code login", isOn: oauthEnabled)
                 .disabled(!model.isProviderEnabled(.claudeCode))
 
-            Text("Off by default. The token is read-only, held in memory, and never refreshed. Anthropic's policy restricts apps from collecting Claude.ai credentials, so this is your call.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(
+                "Off by default. The token is read-only, held in memory, and never refreshed. Anthropic's policy restricts apps from collecting Claude.ai credentials, so this is your call."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
 
             Link("Read the policy note", destination: AppLinks.readmePolicy)
                 .font(.caption)

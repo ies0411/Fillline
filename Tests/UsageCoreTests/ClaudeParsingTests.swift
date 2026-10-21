@@ -63,15 +63,15 @@ struct ClaudeParsingTests {
     @Test("falls back to five_hour when limits[] is absent")
     func fallsBackToBuckets() async throws {
         let json = """
-        {
-          "five_hour": {
-            "utilization": 12.5,
-            "resets_at": "2026-10-21T08:39:59.776536+00:00"
-          },
-          "seven_day": null,
-          "seven_day_opus": null
-        }
-        """
+            {
+              "five_hour": {
+                "utilization": 12.5,
+                "resets_at": "2026-10-21T08:39:59.776536+00:00"
+              },
+              "seven_day": null,
+              "seven_day_opus": null
+            }
+            """
         let http = ScriptedHTTPClient([.init(statusCode: 200, body: Data(json.utf8))])
         let provider = ClaudeCodeProvider(
             httpClient: http,

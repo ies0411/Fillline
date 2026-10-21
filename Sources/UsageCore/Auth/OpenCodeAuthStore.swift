@@ -41,13 +41,15 @@ public struct OpenCodeAuthStore: CredentialStore {
         }
 
         if let data = try? Data(contentsOf: authFileURL),
-           let key = Self.key(fromAuthJSON: data, candidates: Self.authEntryNames) {
+            let key = Self.key(fromAuthJSON: data, candidates: Self.authEntryNames)
+        {
             return ProviderCredential(accessToken: Credential(key))
         }
 
         let configDirectory = environment.xdgConfigHome.appendingPathComponent("opencode", isDirectory: true)
         if !FileManager.default.fileExists(atPath: configDirectory.path),
-           !FileManager.default.fileExists(atPath: authFileURL.path) {
+            !FileManager.default.fileExists(atPath: authFileURL.path)
+        {
             throw CredentialError.notInstalled
         }
         throw CredentialError.needsLogin
@@ -61,7 +63,7 @@ public struct OpenCodeAuthStore: CredentialStore {
         }
         for name in candidates {
             guard let entry = root[name] as? [String: Any],
-                  let key = entry["key"] as? String
+                let key = entry["key"] as? String
             else {
                 continue
             }

@@ -7,7 +7,7 @@
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
     "version": "v0.2.1-alpha.1",
     "license": "MIT",
-    "commits": 25,
+    "commits": 28,
     "branch": "main",
     "pushed": true,
     "issues": 8,
@@ -478,6 +478,18 @@
     {
       "date": "2026-10-21",
       "text": "v0.2.1-alpha.1 릴리스 — stale 카드가 연속 실패 횟수를 표시(116 tests)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "자동화 상향: `.github/workflows/{pages,release}.yml` 추가 + CI에 swift-format lint · gitleaks · shellcheck 게이트. `.swift-format` 도입 후 38개 파일 재포맷(포맷팅만), pre-commit 훅, `mise.toml`"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "마케팅 자산 정리: `docs/marketing/{positioning,launch-plan,copy}.md` — 포지셔닝·경쟁표·런치 게이트·채널별 카피(HN/Reddit/X/PH/FAQ)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "앱 아이콘·OG 카드 제작 진행 중 (`.icns`, 16px·그레이스케일 검증 포함)"
     }
   ]
 }

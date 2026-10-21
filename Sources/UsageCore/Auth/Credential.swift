@@ -102,7 +102,7 @@ public struct CredentialEnvironment: Sendable, Hashable {
 
     public func value(_ name: String) -> String? {
         guard let value = variables[name]?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !value.isEmpty
+            !value.isEmpty
         else {
             return nil
         }
@@ -138,7 +138,7 @@ public struct CredentialEnvironment: Sendable, Hashable {
 /// Reads a UTF-8 text file and trims surrounding whitespace. Returns `nil` when missing.
 func readTrimmedFile(at url: URL) -> String? {
     guard let data = try? Data(contentsOf: url),
-          let text = String(data: data, encoding: .utf8)
+        let text = String(data: data, encoding: .utf8)
     else {
         return nil
     }

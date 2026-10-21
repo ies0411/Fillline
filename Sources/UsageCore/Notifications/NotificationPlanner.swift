@@ -87,9 +87,9 @@ public struct NotificationKey: Hashable, Sendable, CustomStringConvertible {
     public init?(storageString: String) {
         let parts = storageString.split(separator: "|", omittingEmptySubsequences: false)
         guard parts.count == 4,
-              let provider = ProviderID(rawValue: String(parts[0])),
-              let windowKind = LimitWindow.Kind(rawValue: String(parts[1])),
-              let kind = NotificationDecision.Kind(rawValue: String(parts[2]))
+            let provider = ProviderID(rawValue: String(parts[0])),
+            let windowKind = LimitWindow.Kind(rawValue: String(parts[1])),
+            let kind = NotificationDecision.Kind(rawValue: String(parts[2]))
         else {
             return nil
         }
@@ -213,7 +213,8 @@ public struct NotificationPlanner: Sendable {
         for decision: NotificationDecision,
         in snapshots: [UsageSnapshot]
     ) -> NotificationKey {
-        let window = snapshots
+        let window =
+            snapshots
             .first { $0.provider == decision.provider }?
             .windows
             .first { $0.kind == decision.windowKind }

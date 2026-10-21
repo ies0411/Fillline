@@ -102,15 +102,16 @@ struct NotificationPlannerTests {
         let snapshot = snapshot(windows: [
             window(usedFraction: 0.96, kind: .session5h),
             window(usedFraction: 0.82, kind: .weekly7d),
-            window(usedFraction: 0.20, kind: .monthly)
+            window(usedFraction: 0.20, kind: .monthly),
         ])
 
         let decisions = planner.decisions(for: [snapshot], now: now)
 
-        #expect(labels(decisions) == [
-            "claude-code/session-5h/critical95",
-            "claude-code/weekly-7d/warning80"
-        ])
+        #expect(
+            labels(decisions) == [
+                "claude-code/session-5h/critical95",
+                "claude-code/weekly-7d/warning80",
+            ])
     }
 
     // MARK: - Placeholders and estimates
@@ -130,11 +131,12 @@ struct NotificationPlannerTests {
         // A placeholder on one window must not hide a real one on another.
         let mixed = snapshot(windows: [
             window(usedFraction: 0.99, kind: .session5h, isPlaceholder: true),
-            window(usedFraction: 0.90, kind: .weekly7d)
+            window(usedFraction: 0.90, kind: .weekly7d),
         ])
-        #expect(labels(planner.decisions(for: [mixed], now: now)) == [
-            "claude-code/weekly-7d/warning80"
-        ])
+        #expect(
+            labels(planner.decisions(for: [mixed], now: now)) == [
+                "claude-code/weekly-7d/warning80"
+            ])
     }
 
     // MARK: - Status gating
@@ -147,7 +149,7 @@ struct NotificationPlannerTests {
             .notSubscribed,
             .unsupported,
             .rateLimited(retryAfter: 120),
-            .error("http-500")
+            .error("http-500"),
         ]
 
         for status in statuses {
@@ -227,13 +229,14 @@ struct NotificationPlannerTests {
     func resetSoonIsIndependent() {
         let snapshot = snapshot(windows: [
             window(usedFraction: 0.50, kind: .session5h, resetsIn: 60),
-            window(usedFraction: 0.85, kind: .weekly7d, resetsIn: 3_600)
+            window(usedFraction: 0.85, kind: .weekly7d, resetsIn: 3_600),
         ])
 
-        #expect(labels(planner.decisions(for: [snapshot], now: now)) == [
-            "claude-code/session-5h/resetSoon",
-            "claude-code/weekly-7d/warning80"
-        ])
+        #expect(
+            labels(planner.decisions(for: [snapshot], now: now)) == [
+                "claude-code/session-5h/resetSoon",
+                "claude-code/weekly-7d/warning80",
+            ])
     }
 
     // MARK: - Dedupe and re-arming
@@ -242,7 +245,7 @@ struct NotificationPlannerTests {
     func dedupe() {
         let snapshots = [
             snapshot(windows: [window(usedFraction: 0.90, kind: .session5h)]),
-            snapshot(provider: .codex, windows: [window(usedFraction: 0.90, kind: .session5h)])
+            snapshot(provider: .codex, windows: [window(usedFraction: 0.90, kind: .session5h)]),
         ]
 
         let first = planner.decisions(for: snapshots, now: now)
@@ -312,30 +315,38 @@ struct NotificationPlannerTests {
     @Test("decisions are ordered by provider, then window kind")
     func deterministicOrder() {
         let unsorted = [
-            snapshot(provider: .openCodeGo, windows: [
-                window(usedFraction: 0.90, kind: .monthly),
-                window(usedFraction: 0.90, kind: .rolling)
-            ]),
-            snapshot(provider: .claudeCode, windows: [
-                window(usedFraction: 0.90, kind: .weekly7d),
-                window(usedFraction: 0.90, kind: .session5h)
-            ]),
-            snapshot(provider: .codex, windows: [
-                window(usedFraction: 0.90, kind: .weekly7d)
-            ])
+            snapshot(
+                provider: .openCodeGo,
+                windows: [
+                    window(usedFraction: 0.90, kind: .monthly),
+                    window(usedFraction: 0.90, kind: .rolling),
+                ]),
+            snapshot(
+                provider: .claudeCode,
+                windows: [
+                    window(usedFraction: 0.90, kind: .weekly7d),
+                    window(usedFraction: 0.90, kind: .session5h),
+                ]),
+            snapshot(
+                provider: .codex,
+                windows: [
+                    window(usedFraction: 0.90, kind: .weekly7d)
+                ]),
         ]
 
-        #expect(labels(planner.decisions(for: unsorted, now: now)) == [
-            "claude-code/session-5h/warning80",
-            "claude-code/weekly-7d/warning80",
-            "codex/weekly-7d/warning80",
-            "opencode-go/monthly/warning80",
-            "opencode-go/rolling/warning80"
-        ])
+        #expect(
+            labels(planner.decisions(for: unsorted, now: now)) == [
+                "claude-code/session-5h/warning80",
+                "claude-code/weekly-7d/warning80",
+                "codex/weekly-7d/warning80",
+                "opencode-go/monthly/warning80",
+                "opencode-go/rolling/warning80",
+            ])
 
         // Reversing the input must not change the output.
-        #expect(labels(planner.decisions(for: unsorted.reversed(), now: now))
-            == labels(planner.decisions(for: unsorted, now: now)))
+        #expect(
+            labels(planner.decisions(for: unsorted.reversed(), now: now))
+                == labels(planner.decisions(for: unsorted, now: now)))
     }
 
     // MARK: - Configuration

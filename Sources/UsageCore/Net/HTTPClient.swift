@@ -20,8 +20,9 @@ extension HTTPURLResponse {
     ///
     /// `now` is a parameter so callers can use their injected clock in tests.
     public func retryAfterSeconds(now: Date = Date()) -> TimeInterval? {
-        guard let raw = value(forHTTPHeaderField: "Retry-After")?
-            .trimmingCharacters(in: .whitespacesAndNewlines),
+        guard
+            let raw = value(forHTTPHeaderField: "Retry-After")?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
             !raw.isEmpty
         else {
             return nil

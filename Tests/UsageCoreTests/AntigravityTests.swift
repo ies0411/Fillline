@@ -16,7 +16,9 @@ actor FakeAntigravityProcessRunner: AntigravityProcessRunning {
     private let outcome: Result<AntigravityProcessOutput, AntigravityProcessError>
     private(set) var calls: [Call] = []
 
-    init(stdout: Data, exitCode: Int32 = 0, stderrHint: AntigravityStderrHint = .none, stderrByteCount: Int = 0) {
+    init(
+        stdout: Data, exitCode: Int32 = 0, stderrHint: AntigravityStderrHint = .none, stderrByteCount: Int = 0
+    ) {
         outcome = .success(
             AntigravityProcessOutput(
                 exitCode: exitCode,
@@ -82,12 +84,13 @@ struct AntigravityTests {
 
     @Test("invokes agy with the documented argv, private env, and 95s deadline")
     func invocationContract() async throws {
-        let runner = FakeAntigravityProcessRunner(stdout: Data(#"{"command":{"name":"usage","data":{"groups":[]}}}"#.utf8))
+        let runner = FakeAntigravityProcessRunner(
+            stdout: Data(#"{"command":{"name":"usage","data":{"groups":[]}}}"#.utf8))
         let variables = [
             "PATH": "/usr/bin:/bin",
             "ANTIGRAVITY_CLI_PATH": installedPath,
             "DISPLAY": ":0",
-            "GOOGLE_APPLICATION_CREDENTIALS": "/secrets/ya29.never-read"
+            "GOOGLE_APPLICATION_CREDENTIALS": "/secrets/ya29.never-read",
         ]
         let snapshot = await provider(runner: runner, executable: nil, variables: variables)
             .fetch(now: now)
@@ -148,12 +151,12 @@ struct AntigravityTests {
     @Test("free-tier weekly-only report never gains a synthetic 5h row")
     func weeklyOnly() async {
         let json = """
-        {"command":{"name":"usage","data":{"groups":[
-          {"displayName":"Gemini Models","buckets":[
-            {"bucketId":"gemini-weekly","window":"weekly","resetTime":"2026-10-27T00:00:00Z","remainingFraction":0.64}
-          ]}
-        ]}}}
-        """
+            {"command":{"name":"usage","data":{"groups":[
+              {"displayName":"Gemini Models","buckets":[
+                {"bucketId":"gemini-weekly","window":"weekly","resetTime":"2026-10-27T00:00:00Z","remainingFraction":0.64}
+              ]}
+            ]}}}
+            """
         let snapshot = await fetch(json: json)
 
         #expect(snapshot.status == .ok)
@@ -165,12 +168,12 @@ struct AntigravityTests {
     @Test("accepts snake_case keys and a fractional ISO reset time")
     func snakeCaseAndISO8601() async throws {
         let json = """
-        {"data":{"groups":[
-          {"display_name":"Claude and GPT models","buckets":[
-            {"bucket_id":"3p-5h","window":"5h","reset_time":"2026-10-21T12:00:00.123Z","remaining_fraction":0.4}
-          ]}
-        ]}}
-        """
+            {"data":{"groups":[
+              {"display_name":"Claude and GPT models","buckets":[
+                {"bucket_id":"3p-5h","window":"5h","reset_time":"2026-10-21T12:00:00.123Z","remaining_fraction":0.4}
+              ]}
+            ]}}
+            """
         let snapshot = await fetch(json: json)
 
         #expect(snapshot.status == .ok)
@@ -186,13 +189,13 @@ struct AntigravityTests {
     @Test("skips buckets that carry only a reset time")
     func skipsRowsWithoutFraction() async {
         let json = """
-        {"data":{"groups":[
-          {"displayName":"Gemini Models","buckets":[
-            {"bucketId":"gemini-weekly","window":"weekly","resetTime":"2026-10-27T00:00:00Z","remainingFraction":0.64},
-            {"bucketId":"gemini-5h","window":"5h","resetTime":"2026-10-21T12:00:00Z"}
-          ]}
-        ]}}
-        """
+            {"data":{"groups":[
+              {"displayName":"Gemini Models","buckets":[
+                {"bucketId":"gemini-weekly","window":"weekly","resetTime":"2026-10-27T00:00:00Z","remainingFraction":0.64},
+                {"bucketId":"gemini-5h","window":"5h","resetTime":"2026-10-21T12:00:00Z"}
+              ]}
+            ]}}
+            """
         let snapshot = await fetch(json: json)
 
         #expect(snapshot.status == .ok)
@@ -313,13 +316,13 @@ struct AntigravityTests {
             "ANTIGRAVITY_CLI_PATH": installedPath,
             "GOOGLE_APPLICATION_CREDENTIALS": "/secrets/ya29.super-secret",
             "OPENCODE_API_KEY": "oc_sk_shouldnotappear",
-            "ANTIGRAVITY_ACCOUNT": "user@example.com"
+            "ANTIGRAVITY_ACCOUNT": "user@example.com",
         ]
 
         let cases: [FakeAntigravityProcessRunner] = [
             FakeAntigravityProcessRunner(stdout: Data(#"{"unexpected":true}"#.utf8)),
             FakeAntigravityProcessRunner(stdout: Data(), exitCode: 1, stderrHint: .authenticationRequired),
-            FakeAntigravityProcessRunner(error: .timedOut)
+            FakeAntigravityProcessRunner(error: .timedOut),
         ]
 
         for runner in cases {
@@ -328,7 +331,7 @@ struct AntigravityTests {
                 String(describing: snapshot.status),
                 snapshot.plan ?? "",
                 snapshot.windows.map(\.label).joined(separator: ","),
-                snapshot.windows.map(\.id).joined(separator: ",")
+                snapshot.windows.map(\.id).joined(separator: ","),
             ].joined(separator: "|")
 
             for secret in secrets {
@@ -341,9 +344,9 @@ struct AntigravityTests {
     // MARK: Fixtures
 
     private static let plainTextReport = """
-    Antigravity usage
-    Gemini Models: 5h 82% left
-    Claude and GPT models: Weekly 71% remaining
-    Reset credits: 2 available
-    """
+        Antigravity usage
+        Gemini Models: 5h 82% left
+        Claude and GPT models: Weekly 71% remaining
+        Reset credits: 2 available
+        """
 }

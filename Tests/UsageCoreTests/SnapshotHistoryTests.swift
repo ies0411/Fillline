@@ -72,10 +72,12 @@ struct SnapshotHistoryTests {
         let store = history(in: directory)
 
         let added = await store.record(
-            snapshot(at: t0, windows: [
-                window(.session5h, usedFraction: 0.25, at: t0),
-                window(.weekly7d, usedFraction: 0.8, at: t0)
-            ])
+            snapshot(
+                at: t0,
+                windows: [
+                    window(.session5h, usedFraction: 0.25, at: t0),
+                    window(.weekly7d, usedFraction: 0.8, at: t0),
+                ])
         )
         #expect(added == 2)
 
@@ -144,11 +146,13 @@ struct SnapshotHistoryTests {
         let store = history(in: directory)
 
         await store.record(
-            snapshot(at: t0, windows: [
-                window(.session5h, usedFraction: 0.2, at: t0),
-                window(.weekly7d, usedFraction: 0.3, at: t0, isEstimated: true),
-                window(.monthly, usedFraction: 0.4, at: t0, isPlaceholder: true)
-            ])
+            snapshot(
+                at: t0,
+                windows: [
+                    window(.session5h, usedFraction: 0.2, at: t0),
+                    window(.weekly7d, usedFraction: 0.3, at: t0, isEstimated: true),
+                    window(.monthly, usedFraction: 0.4, at: t0, isPlaceholder: true),
+                ])
         )
 
         #expect(await store.sampleCount == 1)
@@ -169,7 +173,7 @@ struct SnapshotHistoryTests {
             .notInstalled,
             .rateLimited(retryAfter: 30),
             .unsupported,
-            .error("http-500")
+            .error("http-500"),
         ]
 
         for (index, status) in statuses.enumerated() {
@@ -265,10 +269,12 @@ struct SnapshotHistoryTests {
         for offset in [0.0, 60.0] {
             let at = t0.addingTimeInterval(offset)
             await first.record(
-                snapshot(at: at, windows: [
-                    window(.session5h, usedFraction: 0.2, at: at),
-                    window(.weekly7d, usedFraction: 0.6, at: at)
-                ])
+                snapshot(
+                    at: at,
+                    windows: [
+                        window(.session5h, usedFraction: 0.2, at: at),
+                        window(.weekly7d, usedFraction: 0.6, at: at),
+                    ])
             )
         }
 
@@ -304,22 +310,22 @@ struct SnapshotHistoryTests {
         defer { try? FileManager.default.removeItem(at: directory) }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let json = """
-        {
-          "version": 1,
-          "series": [
             {
-              "provider": "some-future-cli",
-              "windowKind": "session-5h",
-              "samples": [{ "capturedAt": 1792572000, "usedFraction": 0.5 }]
-            },
-            {
-              "provider": "claude-code",
-              "windowKind": "semester",
-              "samples": [{ "capturedAt": 1792572000, "usedFraction": 0.5 }]
+              "version": 1,
+              "series": [
+                {
+                  "provider": "some-future-cli",
+                  "windowKind": "session-5h",
+                  "samples": [{ "capturedAt": 1792572000, "usedFraction": 0.5 }]
+                },
+                {
+                  "provider": "claude-code",
+                  "windowKind": "semester",
+                  "samples": [{ "capturedAt": 1792572000, "usedFraction": 0.5 }]
+                }
+              ]
             }
-          ]
-        }
-        """
+            """
         try Data(json.utf8).write(to: directory.appendingPathComponent("history.json"))
 
         let store = history(in: directory)

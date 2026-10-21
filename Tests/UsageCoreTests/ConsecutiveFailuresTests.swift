@@ -199,8 +199,8 @@ struct ConsecutiveFailuresTests {
     @Test("a cache entry written before the field existed decodes as 0 failures")
     func legacyJSONDecodes() throws {
         let legacy = """
-        {"provider":"codex","windows":[],"source":"api","status":{"type":"ok"},"capturedAt":792572000}
-        """
+            {"provider":"codex","windows":[],"source":"api","status":{"type":"ok"},"capturedAt":792572000}
+            """
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .secondsSince1970
 

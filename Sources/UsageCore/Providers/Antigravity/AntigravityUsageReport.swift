@@ -127,17 +127,20 @@ extension AntigravityUsageReport {
             return true
         }
         if let command = root["command"] as? [String: Any],
-           let name = command["name"] as? String,
-           name.lowercased().contains("usage") {
+            let name = command["name"] as? String,
+            name.lowercased().contains("usage")
+        {
             return true
         }
         return false
     }
 
     private static func parseBuckets(in group: [String: Any], groupIndex: Int) -> [Bucket] {
-        let displayName = string(group, ["displayName", "display_name", "groupName", "group_name", "name"])
+        let displayName =
+            string(group, ["displayName", "display_name", "groupName", "group_name", "name"])
             ?? "Usage"
-        guard let rawBuckets = (group["buckets"] ?? group["items"] ?? group["windows"]) as? [[String: Any]] else {
+        guard let rawBuckets = (group["buckets"] ?? group["items"] ?? group["windows"]) as? [[String: Any]]
+        else {
             return []
         }
 
@@ -145,9 +148,11 @@ extension AntigravityUsageReport {
             // Some rows only carry a reset time; there is no number to show for those.
             guard let remaining = remainingFraction(from: raw) else { return nil }
 
-            let bucketID = string(raw, ["bucketId", "bucket_id", "id"])
+            let bucketID =
+                string(raw, ["bucketId", "bucket_id", "id"])
                 ?? "\(slug(displayName))-\(groupIndex)-\(index)"
-            let windowCode = string(raw, ["window", "windowCode", "window_code", "cadence"])
+            let windowCode =
+                string(raw, ["window", "windowCode", "window_code", "cadence"])
                 ?? inferredWindowCode(from: bucketID)
                 ?? "unknown"
             return Bucket(
@@ -206,9 +211,10 @@ extension AntigravityUsageReport {
             guard !line.isEmpty else { continue }
 
             let lowered = line.lowercased()
-            guard lowered.contains("left")
-                || lowered.contains("remaining")
-                || lowered.contains("available")
+            guard
+                lowered.contains("left")
+                    || lowered.contains("remaining")
+                    || lowered.contains("available")
             else { continue }
             guard let percent = firstPercent(in: line) else { continue }
 

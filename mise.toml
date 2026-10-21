@@ -1,0 +1,20 @@
+# Toolchain pinning for Fillline contributors.
+#
+# Swift and Xcode are deliberately NOT here: they come from the system
+# (`swift --version`, `xcode-select -p`) so the app is always built by the same
+# compiler the release ships. mise only pins the helper CLIs that are not part
+# of macOS or the Swift toolchain.
+#
+#   mise install          # xcodegen, xcbeautify, gitleaks
+#   mise run test         # ./Scripts/test-local.sh
+#   mise run build        # ./Scripts/build.sh
+#   mise run status       # ./Scripts/status.sh --open
+[tools]
+xcodegen = "2.46.0"
+xcbeautify = "latest"
+gitleaks = "latest"
+
+[tasks]
+test = "./Scripts/test-local.sh"
+build = "./Scripts/build.sh"
+status = "./Scripts/status.sh --open"

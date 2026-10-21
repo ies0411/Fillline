@@ -60,8 +60,8 @@ struct NotificationKeyStore {
         return stored.compactMap { raw -> Entry? in
             let halves = raw.split(separator: "@", maxSplits: 1, omittingEmptySubsequences: false)
             guard halves.count == 2,
-                  let key = NotificationKey(storageString: String(halves[0])),
-                  let firedEpoch = TimeInterval(halves[1])
+                let key = NotificationKey(storageString: String(halves[0])),
+                let firedEpoch = TimeInterval(halves[1])
             else {
                 return nil
             }

@@ -78,7 +78,8 @@ public struct ClaudeCodeProvider: UsageProvider {
         guard response.statusCode == 200 else {
             return ProviderSupport.failureSnapshot(
                 provider: id,
-                status: ProviderSupport.status(forHTTPStatusCode: response.statusCode, response: response, now: now),
+                status: ProviderSupport.status(
+                    forHTTPStatusCode: response.statusCode, response: response, now: now),
                 plan: credential.planHint,
                 now: now
             )

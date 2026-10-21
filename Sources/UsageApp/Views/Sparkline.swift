@@ -141,10 +141,12 @@ struct Sparkline: View {
         }
 
         let covered = max(0, now.timeIntervalSince(first.capturedAt))
-        let period = covered < 60
+        let period =
+            covered < 60
             ? "the last minute"
             : "the last \(UsageFormat.spokenDuration(covered))"
 
-        return "\(data.windowLabel) remaining trend over \(period), \(direction), now \(UsageFormat.remainingText(last.remainingFraction))"
+        return
+            "\(data.windowLabel) remaining trend over \(period), \(direction), now \(UsageFormat.remainingText(last.remainingFraction))"
     }
 }

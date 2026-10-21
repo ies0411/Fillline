@@ -177,7 +177,8 @@ public struct CodexProvider: UsageProvider {
         guard response.statusCode == 200 else {
             return ProviderSupport.failureSnapshot(
                 provider: id,
-                status: ProviderSupport.status(forHTTPStatusCode: response.statusCode, response: response, now: now),
+                status: ProviderSupport.status(
+                    forHTTPStatusCode: response.statusCode, response: response, now: now),
                 now: now
             )
         }

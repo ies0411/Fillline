@@ -239,6 +239,36 @@ docs/status/index.html # `./Scripts/status.sh --open`으로 생성되는 대시�
 - 커밋/태그/push/릴리스는 사용자 지시를 기다리지 않고 제품 수준으로 계속한다
   (단, 인증·서명·유료 작업처럼 되돌릴 수 없는 외부 동작은 확인 후).
 
+### 7.3 마케팅 자산 규칙
+
+마케팅은 별도 SaaS가 아니라 **이 저장소 안의 자산**으로 관리한다(제품 원칙: 텔레메트리·추적 없음).
+
+```
+docs/marketing/positioning.md   # 누구에게 왜 파는가 + 경쟁 지형 + 금지 문구
+docs/marketing/launch-plan.md   # 게이트, 타임라인, 채널, 반박 대응, 측정
+docs/marketing/copy.md          # 재사용 카피 뱅크(EN/KO): HN·Reddit·X·PH·FAQ
+docs/marketing/assets/          # 아이콘·OG 카드·스크린샷·GIF (원본 SVG 포함)
+```
+
+- **카피는 `copy.md`에서만 고친다.** README/릴리스 노트가 다르게 말하면 `copy.md`가 기준이다.
+- 수치(테스트 개수, provider 수, 다운로드)는 **사실일 때만** 쓴다. 추정·과장 금지(§9와 동일 규칙).
+- 스크린샷은 **실제 앱 화면**만 쓴다. 목업/OG 카드를 스크린샷으로 오인시키지 않는다.
+- 아직 없는 것(서명된 빌드, 스크린샷)을 있는 것처럼 쓰지 않는다. "coming"은 "coming"이라고 쓴다.
+- 상표: 제품명에 Claude/Codex/OpenCode/Google을 쓰지 않는다. 설명 문장에서만 지칭하고,
+  README 하단 고지 문구를 유지한다.
+- 공개 문구를 바꾸는 PR은 코드 PR과 분리한다(§9 마지막 규칙과 동일).
+
+### 7.4 툴체인 규칙
+
+- 호스팅은 **GitHub 하나**로 유지한다(no backend, no telemetry). 예외를 만들려면 AGENTS를 먼저 고친다.
+- CI 게이트는 `ci.yml`이 단일 소스: 빌드 · `./Scripts/test-local.sh` · `swift format lint` ·
+  gitleaks · shellcheck · 토큰 패턴 가드 · 도메인 allowlist 가드.
+- 릴리스는 `.github/workflows/release.yml`(태그 push)로 만든다. 로컬 `Scripts/release.sh`는
+  서명 키가 있을 때의 수동 경로로 남긴다.
+- 상태 대시보드는 Pages(`.github/workflows/pages.yml`)로 공개한다: push + 매일 1회.
+- 새 도구를 추가할 때 기준: (1) 오프라인/로컬에서 재현 가능, (2) 무료 티어로 충분,
+  (3) 제품의 "no telemetry" 주장을 깨지 않음. 셋 중 하나라도 어긋나면 도입하지 않는다.
+
 ---
 
 ## 8. 로드맵

@@ -48,7 +48,9 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
 
     /// Window the menu bar should show by default: session first, then weekly, then anything.
     public var primaryWindow: LimitWindow? {
-        let preference: [LimitWindow.Kind] = [.session5h, .weekly7d, .weeklyScoped, .monthly, .rolling, .credits]
+        let preference: [LimitWindow.Kind] = [
+            .session5h, .weekly7d, .weeklyScoped, .monthly, .rolling, .credits,
+        ]
         for kind in preference {
             if let window = window(kind: kind) { return window }
         }

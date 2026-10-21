@@ -98,17 +98,17 @@ struct CodexParsingTests {
     @Test("reset_after_seconds is used but marked estimated")
     func estimatedReset() async throws {
         let json = """
-        {
-          "plan_type": "plus",
-          "rate_limit": {
-            "primary_window": {
-              "used_percent": 10,
-              "limit_window_seconds": 18000,
-              "reset_after_seconds": 600
+            {
+              "plan_type": "plus",
+              "rate_limit": {
+                "primary_window": {
+                  "used_percent": 10,
+                  "limit_window_seconds": 18000,
+                  "reset_after_seconds": 600
+                }
+              }
             }
-          }
-        }
-        """
+            """
         let http = ScriptedHTTPClient([.init(statusCode: 200, body: Data(json.utf8))])
         let provider = CodexProvider(
             httpClient: http,

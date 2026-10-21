@@ -163,7 +163,8 @@ enum UsageFormat {
             resetPhrase = "reset time unknown"
         }
 
-        return "\(window.label), \(remainingText(window.remainingFraction)) remaining, \(resetPhrase), \(usedText(window.usedFraction))"
+        return
+            "\(window.label), \(remainingText(window.remainingFraction)) remaining, \(resetPhrase), \(usedText(window.usedFraction))"
     }
 
     // MARK: Menu bar
@@ -206,9 +207,10 @@ enum UsageFormat {
         case .all, .glyphs:
             shown = entries
         case .compact, .worst:
-            shown = entries.min { lhs, rhs in
-                lhs.remainingFraction < rhs.remainingFraction
-            }.map { [$0] } ?? []
+            shown =
+                entries.min { lhs, rhs in
+                    lhs.remainingFraction < rhs.remainingFraction
+                }.map { [$0] } ?? []
         }
 
         let segments = shown.map { entry -> MenuBarSegment in

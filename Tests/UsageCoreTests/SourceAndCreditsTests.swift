@@ -31,27 +31,27 @@ struct SourceAndCreditsTests {
     }
 
     private static let withResetCredits = """
-    {
-      "rateLimitsByLimitId": {
-        "codex": {
-          "primary": {"usedPercent": 55, "windowMinutes": 300, "resetsAt": 1778670307},
-          "secondary": {"usedPercent": 51, "windowMinutes": 10080, "resetsAt": 1779157165},
-          "planType": "plus",
-          "limitReached": false
+        {
+          "rateLimitsByLimitId": {
+            "codex": {
+              "primary": {"usedPercent": 55, "windowMinutes": 300, "resetsAt": 1778670307},
+              "secondary": {"usedPercent": 51, "windowMinutes": 10080, "resetsAt": 1779157165},
+              "planType": "plus",
+              "limitReached": false
+            }
+          },
+          "rateLimitResetCredits": {"availableCount": 2}
         }
-      },
-      "rateLimitResetCredits": {"availableCount": 2}
-    }
-    """
+        """
 
     private static let withoutResetCredits = """
-    {
-      "rateLimits": {
-        "primary": {"usedPercent": 20, "windowMinutes": 300},
-        "planType": "plus"
-      }
-    }
-    """
+        {
+          "rateLimits": {
+            "primary": {"usedPercent": 20, "windowMinutes": 300},
+            "planType": "plus"
+          }
+        }
+        """
 
     private func snapshot(resetCredits: Int?) -> UsageSnapshot {
         UsageSnapshot(
@@ -189,8 +189,8 @@ struct SourceAndCreditsTests {
 
         // A cache entry written before `resetCredits` existed must still decode.
         let legacy = """
-        {"provider":"codex","windows":[],"source":"api","status":{"type":"ok"},"capturedAt":792572000}
-        """
+            {"provider":"codex","windows":[],"source":"api","status":{"type":"ok"},"capturedAt":792572000}
+            """
         let decoded = try decoder.decode(UsageSnapshot.self, from: Data(legacy.utf8))
         #expect(decoded.resetCredits == nil)
         #expect(decoded.source == .api)

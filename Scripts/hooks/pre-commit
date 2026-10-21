@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+#
+# Fillline pre-commit hook.
+#
+# Three fast checks on what is actually being committed:
+#   1. no staged file larger than 2 MB (fixtures and recordings belong elsewhere),
+#   2. no credential shapes in the *added* lines (gitleaks when installed, the CI
+#      regex from `.github/workflows/ci.yml` otherwise),
+#   3. `swift format lint` on the staged Swift files only.
+#
+# Design rules:
+#   - never echo a matched secret; report file:line only (AGENTS §4),
+#   - a missing optional tool warns and continues — the hook must not be able to
+#     block work because Homebrew changed a formula,
+#   - stays well under 3 seconds on a normal commit.
+#
+# Install with `./Scripts/install-hooks.sh`. Bypass with `git commit --no-verify`.
+set -uo pipefail
+
+# Same shape list as the CI token guard (AGENTS §4). Keep the two in sync.
+TOKEN_PATTERN='(sk-ant-[A-Za-z0-9_-]{8,}|oc_sk_[A-Za-z0-9_-]{8,}|sk-(proj-)?[A-Za-z0-9]{20,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.)'
+MAX_BYTES=$((2 * 1024 * 1024))
+
+cd "$(git rev-parse --show-toplevel)" || exit 0
+
+status=0
+
+# --------------------------------------------------------------------------
+# 1. Oversized staged files
+# --------------------------------------------------------------------------
+staged=()
+while IFS= read -r -d '' path; do
+    staged+=("$path")
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+for path in ${staged[@]+"${staged[@]}"}; do
+    [ -f "$path" ] || continue
+    bytes=$(wc -c <"$path" | tr -d ' ')
+    if [ "$bytes" -gt "$MAX_BYTES" ]; then
+        echo "pre-commit: $path is $((bytes / 1024)) KB (limit 2048 KB)." >&2
+        echo "            Large binaries bloat the clone; host them outside git." >&2
+        status=1
+    fi
+done
+
+# --------------------------------------------------------------------------
+# 2. Secrets in added lines
+# --------------------------------------------------------------------------
+if command -v gitleaks >/dev/null 2>&1; then
+    # v8.19 renamed `protect` to `git`; support both so an older brew install works.
+    if gitleaks git --help >/dev/null 2>&1; then
+        gitleaks git --staged --redact --no-banner --exit-code 1 || status=1
+    elif gitleaks protect --help >/dev/null 2>&1; then
+        gitleaks protect --staged --redact --no-banner --exit-code 1 || status=1
+    else
+        echo "pre-commit: gitleaks present but unsupported; trying the regex guard." >&2
+    fi
+else
+    echo "pre-commit: gitleaks not installed - using the CI regex guard (brew install gitleaks for more)." >&2
+
+    # Walk the staged diff and report the new line numbers of offending additions.
+    hits=$(git diff --cached -U0 --no-color | awk -v pat="$TOKEN_PATTERN" '
+        /^--- /   { next }
+        /^\+\+\+ / { file = substr($0, 7); sub(/^b\//, "", file); next }
+        /^@@ / {
+            split($3, plus, ",")
+            lineno = substr(plus[1], 2) + 0
+            next
+        }
+        /^-/      { next }
+        /^\+/ {
+            if (file != "/dev/null" && $0 ~ pat) print file ":" lineno
+            lineno++
+            next
+        }
+    ')
+
+    if [ -n "$hits" ]; then
+        echo "pre-commit: possible credential in staged lines (value withheld):" >&2
+        printf '%s\n' "$hits" >&2
+        status=1
+    fi
+fi
+
+# --------------------------------------------------------------------------
+# 3. Formatting, staged Swift files only
+# --------------------------------------------------------------------------
+swift_files=()
+swift_count=0
+for path in ${staged[@]+"${staged[@]}"}; do
+    case "$path" in
+        *.swift)
+            if [ -f "$path" ]; then
+                swift_files+=("$path")
+                swift_count=$((swift_count + 1))
+            fi
+            ;;
+    esac
+done
+
+if [ "$swift_count" -gt 0 ]; then
+    if swift format --version >/dev/null 2>&1; then
+        swift format lint --strict ${swift_files[@]+"${swift_files[@]}"} || {
+            echo "pre-commit: formatting differs from .swift-format." >&2
+            echo "            Run: swift format --in-place ${swift_files[*]}" >&2
+            status=1
+        }
+    elif command -v swift-format >/dev/null 2>&1; then
+        swift-format lint --strict ${swift_files[@]+"${swift_files[@]}"} || {
+            echo "pre-commit: formatting differs from .swift-format." >&2
+            echo "            Run: swift-format --in-place ${swift_files[*]}" >&2
+            status=1
+        }
+    else
+        echo "pre-commit: swift format not found - skipping the format check." >&2
+    fi
+fi
+
+exit "$status"

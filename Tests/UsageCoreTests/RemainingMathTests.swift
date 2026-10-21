@@ -210,7 +210,7 @@ struct SnapshotCacheTests {
             .rateLimited(retryAfter: nil),
             .rateLimited(retryAfter: 90),
             .unsupported,
-            .error("http-500")
+            .error("http-500"),
         ]
 
         for status in statuses {

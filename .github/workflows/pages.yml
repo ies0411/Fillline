@@ -1,0 +1,80 @@
+# Publish the Fillline status dashboard to GitHub Pages.
+#
+# The page is PUBLIC. It is generated from `docs/status/data.json` plus local git
+# facts only, and must never contain tokens, e-mail addresses, or absolute
+# paths (AGENTS §7.1). `Scripts/status.py` is the only producer; never hand-edit
+# `docs/status/index.html`.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/status/**'
+      - 'Scripts/status.py'
+      - 'Scripts/status.sh'
+  schedule:
+    # 22:00 UTC = 07:00 KST — the dashboard is fresh before the workday starts.
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel an in-flight deploy: a half-published dashboard is worse than a
+# slightly stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy dashboard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate dashboard
+        run: python3 Scripts/status.py
+
+      # A truncated render is a silent failure mode (empty data.json, template
+      # error). The real page is ~95 KB, so 50 KB catches the broken cases.
+      - name: Verify docs/status/index.html
+        run: |
+          set -euo pipefail
+          page=docs/status/index.html
+          if [ ! -f "$page" ]; then
+            echo "::error::$page was not generated."
+            exit 1
+          fi
+          size=$(wc -c < "$page" | tr -d ' ')
+          echo "docs/status/index.html: ${size} bytes"
+          if [ "$size" -le 51200 ]; then
+            echo "::error::$page is only ${size} bytes (< 50 KB); the render looks truncated."
+            exit 1
+          fi
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/status
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

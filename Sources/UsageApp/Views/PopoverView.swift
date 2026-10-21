@@ -317,14 +317,19 @@ private struct OnboardingView: View {
                     .accessibilityLabel("Read Claude Code login")
             }
 
-            Text(model.claudeOAuthReadEnabled ? "On · read-only, held in memory only." : "Off · local logs only.")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
+            Text(
+                model.claudeOAuthReadEnabled
+                    ? "On · read-only, held in memory only." : "Off · local logs only."
+            )
+            .font(.system(size: 10))
+            .foregroundStyle(.secondary)
 
-            Text("Anthropic's policy doesn't allow apps to collect Claude.ai credentials, so this stays off unless you choose it.")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            Text(
+                "Anthropic's policy doesn't allow apps to collect Claude.ai credentials, so this stays off unless you choose it."
+            )
+            .font(.system(size: 10))
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
 
             Link("Read the policy note", destination: AppLinks.readmePolicy)
                 .font(.system(size: 10, weight: .medium))

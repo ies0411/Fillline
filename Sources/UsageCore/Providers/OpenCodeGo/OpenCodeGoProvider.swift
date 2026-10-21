@@ -70,7 +70,8 @@ public struct OpenCodeGoProvider: UsageProvider {
         default:
             return ProviderSupport.failureSnapshot(
                 provider: id,
-                status: ProviderSupport.status(forHTTPStatusCode: response.statusCode, response: response, now: now),
+                status: ProviderSupport.status(
+                    forHTTPStatusCode: response.statusCode, response: response, now: now),
                 now: now
             )
         }

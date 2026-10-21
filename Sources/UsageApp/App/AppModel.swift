@@ -212,8 +212,10 @@ final class AppModel {
         self.claudeOAuthReadEnabled = defaults.bool(forKey: Keys.claudeOAuthReadEnabled)
         self.notificationsEnabled = defaults.bool(forKey: Keys.notificationsEnabled)
         self.pollInterval = PollInterval(rawValue: defaults.integer(forKey: Keys.pollInterval)) ?? .balanced
-        self.menuBarStyle = MenuBarLabelStyle(rawValue: defaults.string(forKey: Keys.menuBarStyle) ?? "") ?? .all
-        self.menuBarNumber = MenuBarNumber(rawValue: defaults.string(forKey: Keys.menuBarNumber) ?? "") ?? .primary
+        self.menuBarStyle =
+            MenuBarLabelStyle(rawValue: defaults.string(forKey: Keys.menuBarStyle) ?? "") ?? .all
+        self.menuBarNumber =
+            MenuBarNumber(rawValue: defaults.string(forKey: Keys.menuBarNumber) ?? "") ?? .primary
         self.hasCompletedOnboarding = defaults.bool(forKey: Keys.onboardingComplete)
 
         if let stored = defaults.array(forKey: Keys.enabledProviders) as? [String] {
@@ -284,8 +286,8 @@ final class AppModel {
         let entries = orderedProviders.compactMap { provider -> UsageFormat.MenuBarEntry? in
             guard provider != .claudeCode || claudeOAuthReadEnabled else { return nil }
             guard let snapshot = snapshots[provider],
-                  snapshot.hasValues,
-                  let fraction = menuBarFraction(for: snapshot)
+                snapshot.hasValues,
+                let fraction = menuBarFraction(for: snapshot)
             else {
                 return nil
             }
@@ -362,13 +364,15 @@ final class AppModel {
             if force {
                 // Even a manual refresh must not hammer Claude's endpoint.
                 if provider == .claudeCode,
-                   let last = lastAttemptAt[provider],
-                   now.timeIntervalSince(last) < Self.claudeMinimumInterval {
+                    let last = lastAttemptAt[provider],
+                    now.timeIntervalSince(last) < Self.claudeMinimumInterval
+                {
                     continue
                 }
             } else {
                 if let last = lastAttemptAt[provider],
-                   now.timeIntervalSince(last) < effectiveInterval(for: provider) {
+                    now.timeIntervalSince(last) < effectiveInterval(for: provider)
+                {
                     continue
                 }
                 guard await scheduler.isDue(provider, at: now) else { continue }
@@ -469,7 +473,7 @@ final class AppModel {
                 staleAfter: staleAfter,
                 minimumIntervalOverrides: [
                     .claudeCode: Self.claudeMinimumInterval,
-                    .antigravity: Self.antigravityMinimumInterval
+                    .antigravity: Self.antigravityMinimumInterval,
                 ]
             )
         )
@@ -480,9 +484,10 @@ final class AppModel {
         let provider = snapshot.provider
 
         if !snapshot.hasValues,
-           let existing = snapshots[provider],
-           existing.hasValues,
-           snapshot.status.isFailure {
+            let existing = snapshots[provider],
+            existing.hasValues,
+            snapshot.status.isFailure
+        {
             snapshots[provider] = UsageSnapshot(
                 provider: provider,
                 plan: snapshot.plan ?? existing.plan,
@@ -549,7 +554,7 @@ final class AppModel {
 
         for provider in providers {
             guard let snapshot = snapshots[provider],
-                  let window = Self.sparklineWindow(in: snapshot)
+                let window = Self.sparklineWindow(in: snapshot)
             else {
                 updated[provider] = nil
                 continue
@@ -571,7 +576,7 @@ final class AppModel {
     /// cycles across it and become the loudest thing in the card. Weekly (or monthly) shares
     /// the axis's timescale and yields one readable slope.
     private static let sparklineWindowPreference: [LimitWindow.Kind] = [
-        .weekly7d, .weeklyScoped, .monthly, .rolling, .session5h, .credits
+        .weekly7d, .weeklyScoped, .monthly, .rolling, .session5h, .credits,
     ]
 
     private static func sparklineWindow(in snapshot: UsageSnapshot) -> LimitWindow? {
@@ -646,5 +651,6 @@ enum AppLinks {
     /// and Settings only — never fetched by the app, so `github.com` stays out of the
     /// network allowlist.
     static let readme = URL(string: "https://github.com/ies0411/Fillline#privacy")!
-    static let readmePolicy = URL(string: "https://github.com/ies0411/Fillline#unofficial-and-what-that-means")!
+    static let readmePolicy = URL(
+        string: "https://github.com/ies0411/Fillline#unofficial-and-what-that-means")!
 }

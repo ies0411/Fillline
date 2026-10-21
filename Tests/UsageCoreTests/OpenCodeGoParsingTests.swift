@@ -67,7 +67,8 @@ struct OpenCodeGoParsingTests {
 
         let configHome = root.appendingPathComponent("config", isDirectory: true)
         let dataHome = root.appendingPathComponent("data", isDirectory: true)
-        let keyDirectory = configHome
+        let keyDirectory =
+            configHome
             .appendingPathComponent("opencode", isDirectory: true)
             .appendingPathComponent(".secrets", isDirectory: true)
         let authDirectory = dataHome.appendingPathComponent("opencode", isDirectory: true)
@@ -84,7 +85,7 @@ struct OpenCodeGoParsingTests {
 
         let baseVariables = [
             "XDG_CONFIG_HOME": configHome.path,
-            "XDG_DATA_HOME": dataHome.path
+            "XDG_DATA_HOME": dataHome.path,
         ]
 
         let envVariables = baseVariables.merging(["OPENCODE_API_KEY": "oc_sk_env_key"]) { _, new in new }
@@ -116,7 +117,7 @@ struct OpenCodeGoParsingTests {
         let environment = CredentialEnvironment(
             variables: [
                 "XDG_CONFIG_HOME": root.appendingPathComponent("config").path,
-                "XDG_DATA_HOME": root.appendingPathComponent("data").path
+                "XDG_DATA_HOME": root.appendingPathComponent("data").path,
             ],
             homeDirectory: root
         )

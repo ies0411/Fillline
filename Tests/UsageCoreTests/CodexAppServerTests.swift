@@ -52,29 +52,29 @@ struct CodexAppServerTests {
     // MARK: Fixtures
 
     private static let documentedResult = """
-    {
-      "rateLimitsByLimitId": {
-        "codex": {
-          "primary": {"usedPercent": 55, "windowMinutes": 300, "resetsAt": 1778670307},
-          "secondary": {"usedPercent": 51, "windowMinutes": 10080, "resetsAt": 1779157165},
-          "credits": {"hasCredits": true, "unlimited": false, "balance": "0"},
-          "planType": "plus",
-          "limitReached": false
-        },
-        "codex_other": {
-          "primary": {"usedPercent": 12, "windowMinutes": 300}
+        {
+          "rateLimitsByLimitId": {
+            "codex": {
+              "primary": {"usedPercent": 55, "windowMinutes": 300, "resetsAt": 1778670307},
+              "secondary": {"usedPercent": 51, "windowMinutes": 10080, "resetsAt": 1779157165},
+              "credits": {"hasCredits": true, "unlimited": false, "balance": "0"},
+              "planType": "plus",
+              "limitReached": false
+            },
+            "codex_other": {
+              "primary": {"usedPercent": 12, "windowMinutes": 300}
+            }
+          },
+          "rateLimits": {"primary": {"usedPercent": 55, "windowMinutes": 300}},
+          "rateLimitResetCredits": {"availableCount": 2, "credits": [{"id": "x", "expiresAt": "2026-11-01T00:00:00Z"}]}
         }
-      },
-      "rateLimits": {"primary": {"usedPercent": 55, "windowMinutes": 300}},
-      "rateLimitResetCredits": {"availableCount": 2, "credits": [{"id": "x", "expiresAt": "2026-11-01T00:00:00Z"}]}
-    }
-    """
+        """
 
     private var documentedLines: [String] {
         [
             #"{"id":1,"result":{"userAgent":"codex-cli"}}"#,
             #"{"method":"initialized"}"#,
-            Self.line(id: 2, result: Self.documentedResult)
+            Self.line(id: 2, result: Self.documentedResult),
         ]
     }
 
@@ -177,10 +177,10 @@ struct CodexAppServerTests {
     @Test("accepts snake_case keys and an ISO-8601 reset time")
     func snakeCaseAndISO8601() async throws {
         let result = """
-        {"rate_limits_by_limit_id":{"codex":{
-          "primary":{"used_percent":42,"window_minutes":300,"reset_at":"2026-11-01T00:00:00Z"},
-          "plan_type":"pro"}}}
-        """
+            {"rate_limits_by_limit_id":{"codex":{
+              "primary":{"used_percent":42,"window_minutes":300,"reset_at":"2026-11-01T00:00:00Z"},
+              "plan_type":"pro"}}}
+            """
         let runner = FakeCodexProcessRunner(lines: [Self.line(id: 2, result: result)])
         let snapshot = await provider(runner: runner).fetch(now: now)
 
@@ -194,10 +194,10 @@ struct CodexAppServerTests {
     @Test("unknown windows get hour/day labels and the rolling kind")
     func windowLabels() async throws {
         let result = """
-        {"rateLimitsByLimitId":{"codex":{
-          "primary":{"usedPercent":10,"windowMinutes":4320},
-          "secondary":{"usedPercent":20,"windowMinutes":90}}}}
-        """
+            {"rateLimitsByLimitId":{"codex":{
+              "primary":{"usedPercent":10,"windowMinutes":4320},
+              "secondary":{"usedPercent":20,"windowMinutes":90}}}}
+            """
         let runner = FakeCodexProcessRunner(lines: [Self.line(id: 2, result: result)])
         let snapshot = await provider(runner: runner).fetch(now: now)
 
@@ -212,8 +212,10 @@ struct CodexAppServerTests {
 
     @Test("credits are hidden unless hasCredits is true and unlimited is false")
     func creditsVisibility() async throws {
-        let noCredits = #"{"rateLimitsByLimitId":{"codex":{"primary":{"usedPercent":5,"windowMinutes":300},"credits":{"hasCredits":false,"unlimited":false,"balance":"0"}}}}"#
-        let unlimited = #"{"rateLimitsByLimitId":{"codex":{"primary":{"usedPercent":5,"windowMinutes":300},"credits":{"hasCredits":true,"unlimited":true,"balance":"0"}}}}"#
+        let noCredits =
+            #"{"rateLimitsByLimitId":{"codex":{"primary":{"usedPercent":5,"windowMinutes":300},"credits":{"hasCredits":false,"unlimited":false,"balance":"0"}}}}"#
+        let unlimited =
+            #"{"rateLimitsByLimitId":{"codex":{"primary":{"usedPercent":5,"windowMinutes":300},"credits":{"hasCredits":true,"unlimited":true,"balance":"0"}}}}"#
 
         for result in [noCredits, unlimited] {
             let runner = FakeCodexProcessRunner(lines: [Self.line(id: 2, result: result)])
@@ -315,7 +317,7 @@ struct CodexAppServerTests {
             (.incompleteResponse, .error("app-server-incomplete")),
             (.malformedResponse, .error("app-server-malformed")),
             (.rpcError(code: -32601), .error("app-server-rpc-32601")),
-            (.rpcError(code: -32600, isAuthenticationRequired: true), .needsLogin)
+            (.rpcError(code: -32600, isAuthenticationRequired: true), .needsLogin),
         ]
         for (error, expected) in cases {
             let snapshot = await provider(
@@ -332,7 +334,7 @@ struct CodexAppServerTests {
         // Captured from `codex-cli 0.163.0` with no logged-in account.
         let lines = [
             #"{"id":1,"result":{"userAgent":"Fillline/0.163.0 (macOS)","platformFamily":"unix"}}"#,
-            #"{"id":2,"error":{"code":-32600,"message":"codex account authentication required to read rate limits"}}"#
+            #"{"id":2,"error":{"code":-32600,"message":"codex account authentication required to read rate limits"}}"#,
         ]
         let fixture = try TestFixtures.data("codex_usage")
         let http = ScriptedHTTPClient([.init(statusCode: 200, body: fixture)])
@@ -353,7 +355,7 @@ struct CodexAppServerTests {
         let lines = [
             "warning: not json, printed by the CLI",
             #"{"id":1,"result":{}}"#,
-            #"{"id":2,"error":{"code":-32000,"message":"token=secret-value"}}"#
+            #"{"id":2,"error":{"code":-32000,"message":"token=secret-value"}}"#,
         ]
         let snapshot = await provider(
             runner: FakeCodexProcessRunner(lines: lines),

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "indentation": {
+    "spaces": 4
+  },
+  "lineLength": 110,
+  "respectsExistingLineBreaks": true,
+  "tabWidth": 8,
+  "maximumBlankLines": 1,
+  "indentSwitchCaseLabels": false,
+  "lineBreakBeforeEachArgument": false,
+  "lineBreakBeforeEachGenericRequirement": false,
+  "lineBreakBetweenDeclarationAttributes": false,
+  "lineBreakAroundMultilineExpressionChainComponents": false,
+  "prioritizeKeepingFunctionOutputTogether": false,
+  "spacesAroundRangeFormationOperators": false,
+  "spacesBeforeEndOfLineComments": 2,
+  "reflowMultilineStringLiterals": "never",
+  "multiElementCollectionTrailingCommas": true,
+  "indentConditionalCompilationBlocks": true,
+  "fileScopedDeclarationPrivacy": {
+    "accessLevel": "private"
+  },
+  "rules": {
+    "AllPublicDeclarationsHaveDocumentation": false,
+    "AlwaysUseLiteralForEmptyCollectionInit": false,
+    "BeginDocumentationCommentWithOneLineSummary": false,
+    "NeverForceUnwrap": false,
+    "NeverUseForceTry": false,
+    "NeverUseImplicitlyUnwrappedOptionals": false,
+    "NoEmptyLinesOpeningClosingBraces": false,
+    "NoLeadingUnderscores": false,
+    "OmitExplicitReturns": false,
+    "UseEarlyExits": false,
+    "UseWhereClausesInForLoops": false,
+    "ValidateDocumentationComments": false
+  }
+}

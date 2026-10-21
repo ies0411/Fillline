@@ -44,8 +44,9 @@ public struct CodexAuthStore: CredentialStore {
         }
 
         // API-key auth cannot call the ChatGPT usage endpoint; a ChatGPT login is required.
-        guard let token = payload.tokens?.accessToken?
-            .trimmingCharacters(in: .whitespacesAndNewlines),
+        guard
+            let token = payload.tokens?.accessToken?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
             !token.isEmpty
         else {
             throw CredentialError.needsLogin

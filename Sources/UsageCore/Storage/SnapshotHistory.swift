@@ -223,7 +223,7 @@ public actor SnapshotHistory {
 
     private func readFromDisk() -> [SeriesKey: [HistorySample]] {
         guard let data = try? Data(contentsOf: fileURL),
-              let payload = try? JSONDecoder().decode(StoredHistory.self, from: data)
+            let payload = try? JSONDecoder().decode(StoredHistory.self, from: data)
         else { return [:] }
 
         var restored: [SeriesKey: [HistorySample]] = [:]

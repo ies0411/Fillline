@@ -11,10 +11,12 @@ enum NotificationCopy {
         in snapshots: [UsageSnapshot],
         now: Date
     ) -> NotificationPayload? {
-        guard let window = snapshots
-            .first(where: { $0.provider == decision.provider })?
-            .windows
-            .first(where: { $0.kind == decision.windowKind })
+        guard
+            let window =
+                snapshots
+                .first(where: { $0.provider == decision.provider })?
+                .windows
+                .first(where: { $0.kind == decision.windowKind })
         else {
             return nil
         }

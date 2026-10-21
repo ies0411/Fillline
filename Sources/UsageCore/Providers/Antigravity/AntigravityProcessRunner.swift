@@ -175,7 +175,8 @@ public struct AntigravityProcessRunner: AntigravityProcessRunning {
 
     /// `PATH` lookup without spawning anything, so a missing CLI is cheap to detect.
     /// Accepts an explicit path (anything containing `/`) as well as a bare executable name.
-    public static func resolveExecutable(_ nameOrPath: String, environment: CredentialEnvironment) -> String? {
+    public static func resolveExecutable(_ nameOrPath: String, environment: CredentialEnvironment) -> String?
+    {
         let fileManager = FileManager.default
         if nameOrPath.contains("/") {
             return fileManager.isExecutableFile(atPath: nameOrPath) ? nameOrPath : nil
@@ -272,7 +273,7 @@ public struct AntigravityProcessRunner: AntigravityProcessRunning {
         let lowered = text.lowercased()
         let markers = [
             "not logged in", "log in", "login", "sign in", "signin",
-            "authenticat", "unauthorized", "unauthenticated", "401", "oauth", "credentials"
+            "authenticat", "unauthorized", "unauthenticated", "401", "oauth", "credentials",
         ]
         return markers.contains(where: lowered.contains) ? .authenticationRequired : .other
     }

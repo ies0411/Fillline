@@ -143,10 +143,12 @@ struct ProviderCard: View {
                 Text("Local logs only")
                     .font(.system(size: 12, weight: .semibold))
 
-                Text("Reading the Claude Code login is off, so this app isn't using it. Local-log estimates aren't available in this build.")
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                Text(
+                    "Reading the Claude Code login is off, so this app isn't using it. Local-log estimates aren't available in this build."
+                )
+                .font(.system(size: 10.5))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
 
                 SettingsLink {
                     Text("Turn on in Settings")
@@ -246,7 +248,8 @@ private struct UnavailableCopy {
         case .stale:
             symbol = "clock.arrow.circlepath"
             title = "Waiting for fresh data"
-            detail = "The last check was \(UsageFormat.relativeAge(since: snapshot.capturedAt, now: now)). Nothing new came back."
+            detail =
+                "The last check was \(UsageFormat.relativeAge(since: snapshot.capturedAt, now: now)). Nothing new came back."
             self.command = nil
         case .ok:
             symbol = "questionmark.circle"

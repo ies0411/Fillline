@@ -74,7 +74,8 @@ public struct CodexAppServerClient: Sendable {
 
     /// `PATH` lookup without spawning anything, so a missing CLI is cheap to detect.
     /// Accepts an explicit path (anything containing `/`) as well as a bare executable name.
-    public static func resolveExecutable(_ nameOrPath: String, environment: CredentialEnvironment) -> String? {
+    public static func resolveExecutable(_ nameOrPath: String, environment: CredentialEnvironment) -> String?
+    {
         let fileManager = FileManager.default
         if nameOrPath.contains("/") {
             return fileManager.isExecutableFile(atPath: nameOrPath) ? nameOrPath : nil
@@ -118,20 +119,20 @@ public struct CodexAppServerClient: Sendable {
             "params": [
                 "clientInfo": [
                     "name": CodexEndpoints.appServerClientName,
-                    "version": version
+                    "version": version,
                 ]
-            ]
+            ],
         ]
         let read: [String: Any] = [
             "id": CodexEndpoints.appServerRateLimitsRequestID,
-            "method": CodexEndpoints.appServerRateLimitsMethod
+            "method": CodexEndpoints.appServerRateLimitsMethod,
         ]
         return [jsonLine(initialize), jsonLine(read)]
     }
 
     private static func jsonLine(_ object: [String: Any]) -> String {
         guard let data = try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys]),
-              let line = String(data: data, encoding: .utf8)
+            let line = String(data: data, encoding: .utf8)
         else {
             // Callers only pass literal dictionaries; this cannot fail in practice.
             return "{}"
@@ -147,7 +148,8 @@ public struct CodexAppServerClient: Sendable {
 /// wait. stderr is drained but never inspected — only its byte count is logged, because it can
 /// contain tokens.
 public struct CodexProcessRunner: CodexProcessRunning {
-    private static let logger = Logger(subsystem: "dev.ies0411.fillline.usage-core", category: "codex-app-server")
+    private static let logger = Logger(
+        subsystem: "dev.ies0411.fillline.usage-core", category: "codex-app-server")
 
     public init() {}
 
@@ -246,7 +248,8 @@ public struct CodexProcessRunner: CodexProcessRunning {
                 try writeLine(requestLines[nextRequest], to: stdin)
                 nextRequest += 1
             }
-            if CodexAppServerResponse.integer(CodexAppServerResponse.jsonObject(trimmed)?["id"]) == terminalID {
+            if CodexAppServerResponse.integer(CodexAppServerResponse.jsonObject(trimmed)?["id"]) == terminalID
+            {
                 return received
             }
         }

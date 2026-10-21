@@ -101,3 +101,57 @@ jobs:
             exit 1
           fi
           echo "All URLs in Sources/ are on the allowlist."
+
+      # ---------------------------------------------------------------------
+      # Gate: formatting. `.swift-format` at the repo root is the source of
+      # truth (4-space indent, 110 columns). `--strict` is what makes this a
+      # gate: plain `swift format lint` prints warnings but still exits 0.
+      # The formatter ships with Swift 6 toolchains as `swift format`; older
+      # setups fall back to the standalone Homebrew binary.
+      # ---------------------------------------------------------------------
+      - name: Gate - swift format lint
+        run: |
+          set -euo pipefail
+          if ! [ -d Sources ] || ! [ -d Tests ]; then
+            echo "Sources/ or Tests/ not present yet - skipping format gate."
+            exit 0
+          fi
+          if swift format --version >/dev/null 2>&1; then
+            swift format lint --recursive --strict Sources Tests
+          else
+            echo "::warning::swift format unavailable on this toolchain; using swift-format from Homebrew"
+            brew install swift-format
+            swift-format lint -r --strict Sources Tests
+          fi
+
+      # ---------------------------------------------------------------------
+      # Gate: no secrets anywhere in the working tree, history included
+      # (gitleaks also walks .git). This is the backstop for the token-pattern
+      # guard above, which only looks at Sources/.
+      # A brew hiccup must not take CI hostage, so a failed install warns.
+      # ---------------------------------------------------------------------
+      - name: Gate - gitleaks secret scan
+        run: |
+          set -euo pipefail
+          if ! command -v gitleaks >/dev/null 2>&1; then
+            if ! brew install gitleaks; then
+              echo "::warning::gitleaks could not be installed; skipping the secret scan"
+              exit 0
+            fi
+          fi
+          gitleaks dir . --redact --no-banner --exit-code 1
+
+      # ---------------------------------------------------------------------
+      # Gate: shellcheck the release/build automation. `-S warning` keeps it
+      # about real bugs (unquoted expansions, unused vars), not style.
+      # ---------------------------------------------------------------------
+      - name: Gate - shellcheck
+        run: |
+          set -euo pipefail
+          if ! command -v shellcheck >/dev/null 2>&1; then
+            if ! brew install shellcheck; then
+              echo "::warning::shellcheck could not be installed; skipping the shell gate"
+              exit 0
+            fi
+          fi
+          shellcheck -S warning Scripts/*.sh

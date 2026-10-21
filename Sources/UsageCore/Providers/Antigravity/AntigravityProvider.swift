@@ -71,7 +71,8 @@ public struct AntigravityProvider: UsageProvider {
 
         guard output.exitCode == 0 else {
             // An auth-looking stderr is actionable ("run `agy` once"); anything else is a code.
-            let status: ProviderStatus = output.stderrHint == .authenticationRequired
+            let status: ProviderStatus =
+                output.stderrHint == .authenticationRequired
                 ? .needsLogin
                 : .error("exit-\(output.exitCode)")
             return ProviderSupport.failureSnapshot(provider: id, status: status, now: now)
@@ -173,7 +174,8 @@ public struct AntigravityProvider: UsageProvider {
         if lowered.contains("gpt")
             || lowered.contains("claude")
             || lowered.contains("3p")
-            || lowered.contains("third") {
+            || lowered.contains("third")
+        {
             return "3P"
         }
         let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)

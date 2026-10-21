@@ -14,8 +14,9 @@ enum TestFixtures {
 
     static func data(_ name: String) throws -> Data {
         let bundle = Bundle.module
-        guard let url = bundle.url(forResource: name, withExtension: "json", subdirectory: "Fixtures")
-            ?? bundle.url(forResource: name, withExtension: "json")
+        guard
+            let url = bundle.url(forResource: name, withExtension: "json", subdirectory: "Fixtures")
+                ?? bundle.url(forResource: name, withExtension: "json")
         else {
             throw FixtureError.missing(name)
         }
@@ -55,12 +56,12 @@ actor ScriptedHTTPClient: HTTPClient {
         let next = responses.removeFirst()
 
         guard let url = request.url,
-              let response = HTTPURLResponse(
+            let response = HTTPURLResponse(
                 url: url,
                 statusCode: next.statusCode,
                 httpVersion: "HTTP/1.1",
                 headerFields: next.headers
-              )
+            )
         else {
             throw URLError(.badServerResponse)
         }
@@ -72,7 +73,10 @@ actor ScriptedHTTPClient: HTTPClient {
 struct StubCredentialStore: CredentialStore {
     let credential: ProviderCredential?
 
-    init(token: String? = "test-token", accountID: String? = nil, expiresAt: Date? = nil, planHint: String? = nil) {
+    init(
+        token: String? = "test-token", accountID: String? = nil, expiresAt: Date? = nil,
+        planHint: String? = nil
+    ) {
         self.credential = token.map {
             ProviderCredential(
                 accessToken: Credential($0),
@@ -127,7 +131,7 @@ struct PollSchedulerTests {
         let http = ScriptedHTTPClient([
             .init(statusCode: 200, body: fixture),
             .init(statusCode: 429, body: Data(), headers: ["Retry-After": "120"]),
-            .init(statusCode: 200, body: fixture)
+            .init(statusCode: 200, body: fixture),
         ])
         let clock = TestClock(start)
         let provider = ClaudeCodeProvider(
@@ -209,7 +213,7 @@ struct PollSchedulerTests {
         let fixture = try TestFixtures.data("claude_usage")
         let http = ScriptedHTTPClient([
             .init(statusCode: 200, body: fixture),
-            .init(statusCode: 500)
+            .init(statusCode: 500),
         ])
         let clock = TestClock(start)
         let provider = ClaudeCodeProvider(
@@ -258,11 +262,11 @@ struct PollSchedulerTests {
 
         let claudeHTTP = ScriptedHTTPClient([
             .init(statusCode: 200, body: claudeFixture),
-            .init(statusCode: 200, body: claudeFixture)
+            .init(statusCode: 200, body: claudeFixture),
         ])
         let codexHTTP = ScriptedHTTPClient([
             .init(statusCode: 200, body: codexFixture),
-            .init(statusCode: 200, body: codexFixture)
+            .init(statusCode: 200, body: codexFixture),
         ])
 
         let clock = TestClock(start)

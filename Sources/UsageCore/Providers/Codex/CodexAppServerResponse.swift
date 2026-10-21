@@ -37,8 +37,11 @@ struct CodexAppServerResponse: Decodable, Sendable {
             // serializer change degrades to a wrong label instead of a missing window.
             var minutes = container.codexInt([.windowMinutes, .windowMinutesSnake])
             if minutes == nil {
-                minutes = container
-                    .codexInt([.windowSeconds, .windowSecondsSnake, .limitWindowSeconds, .limitWindowSecondsSnake])
+                minutes =
+                    container
+                    .codexInt([
+                        .windowSeconds, .windowSecondsSnake, .limitWindowSeconds, .limitWindowSecondsSnake,
+                    ])
                     .map { $0 / 60 }
             }
             windowMinutes = minutes
@@ -155,8 +158,8 @@ extension CodexAppServerResponse {
                 )
             }
             guard let result = object["result"], JSONSerialization.isValidJSONObject(result),
-                  let data = try? JSONSerialization.data(withJSONObject: result),
-                  let decoded = try? JSONDecoder().decode(CodexAppServerResponse.self, from: data)
+                let data = try? JSONSerialization.data(withJSONObject: result),
+                let decoded = try? JSONDecoder().decode(CodexAppServerResponse.self, from: data)
             else {
                 throw CodexAppServerError.malformedResponse
             }
@@ -216,7 +219,7 @@ extension CodexAppServerResponse {
             let suffix = Self.labelSuffix(forBucket: key)
             let candidates: [(id: String, window: Window?)] = [
                 ("primary", bucket.primary),
-                ("secondary", bucket.secondary)
+                ("secondary", bucket.secondary),
             ]
             for candidate in candidates {
                 guard let window = candidate.window, let usedPercent = window.usedPercent else { continue }
@@ -295,8 +298,8 @@ extension CodexAppServerResponse {
     private static func creditsWindow(buckets: [(String, Bucket)], now: Date) -> LimitWindow? {
         for (_, bucket) in buckets {
             guard let credits = bucket.credits,
-                  credits.hasCredits == true,
-                  credits.unlimited != true
+                credits.hasCredits == true,
+                credits.unlimited != true
             else { continue }
 
             let balance = credits.balance?.trimmingCharacters(in: .whitespacesAndNewlines)
