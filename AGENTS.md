@@ -49,15 +49,18 @@ macOS 메뉴바에 Claude Code / OpenAI(Codex) / Go 의 **남은 사용량과 �
 | **Claude Code** | `GET https://api.anthropic.com/api/oauth/usage` + Bearer + `anthropic-beta: oauth-2025-04-20` + **`User-Agent: claude-code/2.1.80`(필수)** | `~/.claude/projects/**/*.jsonl` 집계 (`estimated` 라벨) | Keychain `Claude Code-credentials` **읽기 전용, refresh 금지**(토큰 회전이 사용자 CLI 세션을 끊음). 최소 180초 간격, UA 없으면 429 폭풍 |
 | **OpenAI Codex** | `codex app-server` → `account/rateLimits/read` (문서화된 JSON-RPC) | `GET https://chatgpt.com/backend-api/wham/usage` + `~/.codex/auth.json` 토큰 → 최후: `sessions/**/*.jsonl`의 `rate_limits` 블록 | refresh 금지. `auth.json` 없으면 `.notInstalled`. `reset_at`은 epoch **초** |
 | **OpenCode Go** | `GET https://opencode.ai/zen/go/v1/usage` + Bearer `oc_sk_…` 키 | 마지막 성공 스냅샷 | `rolling`(5h) / `weekly`(7d) / `monthly` 3윈도우, `percent`=사용률 0–100. 403=구독 없음(`.notSubscribed`) |
-| ~~Gemini CLI~~ | **제외** — 2026-06-18 개인 사용자 OAuth 종료, 1st-party client secret 재사용 필요 | — | `docs/providers/deferred.md` |
-| Antigravity (v2 후보) | `v1internal:retrieveUserQuotaSummary` + `UA: antigravity` | — | 문서화 안 됨. 수요 있을 때만 |
+| **Antigravity** (선택, 기본 off) | **`agy -p /usage --output-format json`** 서브프로세스 실행 후 출력 파싱 | 마지막 성공 스냅샷 | `gemini`/`3P` × `5h`/`weekly`. `remainingFraction`은 **남은 값(0–1)** → `used = 1 - remaining`. 자격증명·Google 엔드포인트 **절대 접근 금지**(ToS §6, 실제 계정 제재 사례). 5–10분 간격 |
+| ~~Gemini CLI~~ | **제외(영구)** — 2026-06-18 개인/AI Pro/Ultra 자격 종료. 200 + `UNSUPPORTED_CLIENT` → 403 | — | `docs/providers/deferred.md` |
 
 핵심 원칙(실측으로 확정됨):
-- 세 provider 모두 `percent`/`utilization`이 **0–100 "사용"** 값 → 남은 % = `100 − used`.
-- 리셋 시각 포맷이 **전부 다르다**: Claude `ISO8601 + 6자리 소수초`, Go `ISO8601 + 밀리초`, Codex `epoch 초`.
-  → 파서를 공유하지 말고 provider별로 분리하고 각각 테스트한다.
+- 단위가 **두 종류**다: Claude/Codex/OpenCode Go는 **0–100 "사용"** → 남은 % = `100 − used`.
+  Antigravity는 **0–1 "남은 값"** → `used = 1 − remaining`. 파서를 공유하지 않는다.
+- 리셋 시각 포맷도 **전부 다르다**: Claude `ISO8601 + 6자리 소수초`, Go `ISO8601 + 밀리초`, Codex `epoch 초`,
+  Antigravity `ISO8601`(초 단위). provider별 파서 + 각각 테스트.
 - **토큰 refresh는 어떤 provider에서도 하지 않는다.** 만료 시 `.needsLogin` + "CLI를 한 번 실행해 갱신" 안내.
-- Codex는 이 머신에 미설치 → `.notInstalled` 카드 UX가 v1 필수 요구사항.
+- **자격증명을 읽는 provider는 Claude Code 하나뿐**이다. Codex/Antigravity는 CLI를 실행해 출력만 읽고,
+  OpenCode Go는 자기 API 키를 쓴다. 이 비대칭을 README·UI에 그대로 드러낸다.
+- Codex/Antigravity는 이 머신에 미설치 → `.notInstalled` 카드 UX가 v1 필수 요구사항.
 
 ### Provider 공통 규칙
 - 자격증명은 **읽기만** 한다. **토큰 refresh는 하지 않는다** (Codex/Claude 모두 refresh token이 1회용이고
@@ -201,12 +204,23 @@ CODE_OF_CONDUCT.md
 .github/ISSUE_TEMPLATE/{bug,provider_broken}.yml
 SECURITY.md          # 취약점 제보 경로 (토큰 유출 대응 포함)
 docs/providers/*.md  # provider별 데이터 소스·깨짐 이력 문서화
+docs/status/data.json # 제품/진행 상황의 단일 소스 (숫자·상태를 여기서만 고친다)
+docs/status/index.html # `./Scripts/status.sh --open`으로 생성되는 대시보드 (커밋 대상)
 ```
 
 - PR 규칙: 1 PR = 1 관심사, provider 파서 변경 시 fixture 동봉, 사용자 노출 문자열은 리뷰 대상.
 - 릴리스: semver. provider API 깨짐 수정은 patch.
 - 커밋: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`).
 - 사용자 요청 없는 `git push`/`git commit` 금지.
+
+### 7.1 진행 상황 대시보드 (사용자 상시 요청)
+
+- 사용자는 **주기적인 진행/제품 리포트**를 원한다. 갱신은 `./Scripts/status.sh --open`.
+- **숫자와 상태는 `docs/status/data.json`에서만 고친다.** HTML을 직접 편집하지 않는다(생성물).
+- 갱신 시점: (1) 마일스톤 완료, (2) 커밋/푸시 후, (3) provider 상태 변화(실측/중단/제외),
+  (4) 블로커 발생·해소. 최소한 Phase 전환 때는 반드시.
+- `data.json`은 **사실만** 담는다. 확인하지 않은 값은 `"미확인"`으로 쓰고, 추정을 사실처럼 쓰지 않는다.
+- 대시보드는 공개 문서다: 토큰·이메일·계정 ID·내부 경로(`/Users/...`)를 넣지 않는다.
 
 ---
 

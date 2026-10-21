@@ -1,0 +1,382 @@
+{
+  "meta": {
+    "product": "Fillline",
+    "tagline": "AI 코딩 CLI의 남은 사용량을 메뉴바에 — 한도에 부딪히기 전에 보이게",
+    "repo": "ies0411/Fillline",
+    "status": "pre-alpha",
+    "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
+    "version": "0.1.0",
+    "license": "MIT"
+  },
+  "stats": [
+    {
+      "label": "Provider",
+      "value": "4",
+      "sub": "Claude Code · Codex · OpenCode Go · Antigravity"
+    },
+    {
+      "label": "테스트",
+      "value": "63",
+      "sub": "10 suites · fixture 기반 · 전부 통과"
+    },
+    {
+      "label": "의존성",
+      "value": "0",
+      "sub": "Swift 표준 라이브러리만"
+    },
+    {
+      "label": "앱 빌드",
+      "value": "성공",
+      "sub": "Xcode 26.3 · .app 실행 확인"
+    }
+  ],
+  "summary": {
+    "what": "macOS 메뉴바에 Claude Code · OpenAI Codex · OpenCode Go · Antigravity의 남은 사용량과 리셋 시각을 상시 표시하는 오픈소스 앱.",
+    "why": "한도에 부딪힌 뒤에야 알게 되는 문제를 없앤다. 값이 없으면 없다고 말하고, 낡았으면 낡았다고 표시한다.",
+    "success": [
+      "실행 후 3초 내 첫 값, 30초 주기 갱신",
+      "provider별 5시간/주간(또는 rolling/weekly/monthly) 잔여 %와 리셋 카운트다운",
+      "실패 시 마지막 성공값 + stale 표시, 0%로 오표시 금지",
+      "토큰·이메일 등 민감정보를 로그·크래시 리포트·이슈에 남기지 않음"
+    ],
+    "non_goals": [
+      "비용 환산 대시보드 (v2 후보)",
+      "Windows/Linux, 팀 단위 집계",
+      "대화 내용·프롬프트 수집"
+    ]
+  },
+  "providers": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "short": "C",
+      "verification": "실측 완료 (2026-10-21, HTTP 200)",
+      "tone": "ok",
+      "windows": "5시간 세션 + 주간 7일 (+ scoped)",
+      "source": "GET api.anthropic.com/api/oauth/usage",
+      "credential": "Keychain `Claude Code-credentials` (읽기 전용)",
+      "units": "0–100 사용률 → 남은 % = 100 − used",
+      "reset_format": "ISO8601 + 6자리 소수초",
+      "notes": [
+        "`User-Agent: claude-code/*` 없으면 429 폭풍 — 필수 헤더",
+        "최소 180초 간격, 지수 백오프",
+        "토큰 refresh 금지 (회전하면 사용자 CLI 세션이 끊김)",
+        "문서화된 대안: statusLine stdin의 rate_limits (v1.x 후보)"
+      ],
+      "legal": "Anthropic은 Claude.ai 자격증명의 수집·저장·중계를 금지. → 옵트인(기본 off), 메모리 전용."
+    },
+    {
+      "id": "codex",
+      "name": "OpenAI Codex",
+      "short": "O",
+      "verification": "계약 문서화 + app-server 구현 완료, 실측 보류 (CLI 미설치)",
+      "tone": "warn",
+      "windows": "세션 5시간 + 주간 7일 (+ 추가 rate limits)",
+      "source": "codex app-server RPC → wham/usage HTTP → 세션 JSONL",
+      "credential": "CLI에 위임 (`~/.codex/auth.json` 직접 읽기만)",
+      "units": "0–100 사용률 → 남은 % = 100 − used",
+      "reset_format": "epoch 초",
+      "notes": [
+        "문서화된 app-server 경로가 1순위, 내부 HTTP가 폴백",
+        "10초 타임아웃, SIGTERM→SIGKILL, 고아 프로세스 금지",
+        "refresh 금지 — 토큰 회전은 CLI 세션을 깨뜨림",
+        "미설치 시 `not installed` 카드 (v1 필수 UX)"
+      ],
+      "legal": "wham/usage는 내부 엔드포인트. 문서화된 app-server를 기본 경로로 둔다."
+    },
+    {
+      "id": "opencode-go",
+      "name": "OpenCode Go",
+      "short": "G",
+      "verification": "실측 완료 (2026-10-21, HTTP 200)",
+      "tone": "ok",
+      "windows": "rolling(5h) + weekly + monthly",
+      "source": "GET opencode.ai/zen/go/v1/usage",
+      "credential": "`oc_sk_…` 키 (env → secrets 파일 → auth.json)",
+      "units": "0–100 사용률 → 남은 % = 100 − used",
+      "reset_format": "ISO8601 + 밀리초",
+      "notes": [
+        "실측값: rolling 0% / weekly 59% / monthly 74%",
+        "percent 0이면 resetsAt은 now+window placeholder → 흐리게 표시",
+        "403 = 구독 없음(`not subscribed`), 401과 구분",
+        "윈도우별 status가 ok가 아니면 0%가 아니라 '데이터 없음'"
+      ],
+      "legal": "사용자 자신의 API 키. 자격증명 중계·쿠키·1st-party impersonation 없음."
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "short": "A",
+      "verification": "구현 + 14개 테스트 완료, CLI 미설치로 실측 보류",
+      "tone": "warn",
+      "windows": "Gemini / 3P × 5시간 + 주간",
+      "source": "`agy -p /usage --output-format json` (공식 CLI 실행)",
+      "credential": "없음 — 자격증명을 읽지 않는다",
+      "units": "0–1 남은 값 → used = 1 − remaining (코어에서 정규화)",
+      "reset_format": "ISO8601 (초 단위)",
+      "notes": [
+        "선택 provider, 기본 off, 5–10분 간격",
+        "전용 임시 cwd(0700), stdin /dev/null, BROWSER=/usr/bin/false",
+        "free tier는 weekly만, enterprise는 패널 없음 → unsupported",
+        "텍스트 폴백은 isEstimated 라벨"
+      ],
+      "legal": "Antigravity ToS §6: 제3자 도구로 서비스 접근 금지. → 자격증명·Google 엔드포인트 절대 접근 안 함."
+    }
+  ],
+  "rejected": [
+    {
+      "name": "Gemini CLI",
+      "reason": "2026-06-18 개인/AI Pro/Ultra OAuth 종료. loadCodeAssist가 200 + UNSUPPORTED_CLIENT를 주고 retrieveUserQuota가 403.",
+      "verdict": "영구 제외 — 살아있는 경로가 1st-party client secret 재사용뿐 (ToS 위반)"
+    }
+  ],
+  "architecture": {
+    "tree": "Package.swift\n├─ UsageCore (library, UI 무관)\n│   ├─ Models/     UsageSnapshot, LimitWindow, ProviderStatus\n│   ├─ Providers/  ClaudeCode · Codex · OpenCodeGo · Antigravity\n│   ├─ Auth/       Credential(redacted), Keychain/파일 스토어\n│   ├─ Net/        HTTPClient 프로토콜 + URLSession 구현, RetryPolicy\n│   ├─ Schedule/   actor PollScheduler (provider별 독립)\n│   └─ Storage/    SnapshotCache (temp → rename 원자적)\n└─ UsageApp (SwiftUI, MenuBarExtra + 팝오버)",
+    "principles": [
+      "Core는 순수 — 네트워크/키체인/시계를 프로토콜로 주입해 fixture만으로 테스트",
+      "provider 실패는 앱 실패가 아니다 — 카드 단위 독립 상태",
+      "파서는 공유하지 않는다 — 단위 2종, 리셋 포맷 4종",
+      "UI 스레드에서 네트워크/키체인 접근 금지"
+    ],
+    "polling": "provider별 최소 60초 (Claude 180초, Antigravity 300초), 지수 백오프 60s→2m→5m→15m→30m, Retry-After 존중",
+    "testing": "`./Scripts/test-local.sh`가 로컬 게이트. CLT 환경의 `swift test`는 테스트를 실행하지 않고 exit 0 하므로 신뢰 금지."
+  },
+  "security": {
+    "asymmetry": "자격증명을 읽는 provider는 Claude Code 하나뿐. Codex/Antigravity는 CLI를 실행해 출력만 읽고, OpenCode Go는 자기 API 키를 쓴다.",
+    "allowlist": [
+      "api.anthropic.com",
+      "chatgpt.com",
+      "opencode.ai"
+    ],
+    "policies": [
+      "토큰은 메모리 전용 — 디스크 복사·로그·크래시 리포트 금지",
+      "Redacted 래퍼 + os.Logger privacy .private",
+      "토큰 refresh 금지 (1회용 회전이 원본 CLI를 깨뜨림)",
+      "CI가 Sources/의 하드코딩 토큰과 allowlist 밖 URL을 모두 실패 처리",
+      "샌드박스 비활성 → Mac App Store 배포 포기 (README에 명시)"
+    ],
+    "risks": [
+      {
+        "level": "high",
+        "text": "비공식 엔드포인트 변동 — 계약이 아니라 관측. 파서는 fixture로 고정하고 폴백을 유지"
+      },
+      {
+        "level": "high",
+        "text": "Anthropic 자격증명 정책 — 옵트인 + 메모리 전용 + 원격 철회 가능성 명시"
+      },
+      {
+        "level": "medium",
+        "text": "계정 제재 가능성 — 간격 하한 + 백오프 + 사용자 고지"
+      },
+      {
+        "level": "medium",
+        "text": "상표 — 제품명에 Claude/Codex/OpenCode 미사용, README에 비제휴 고지"
+      }
+    ]
+  },
+  "roadmap": [
+    {
+      "phase": "Phase 0",
+      "title": "검증 스파이크",
+      "state": "done",
+      "items": [
+        {
+          "text": "Claude Code 실측 캡처 (5h 2% / weekly 20% / scoped)",
+          "done": true
+        },
+        {
+          "text": "OpenCode Go 실측 캡처 (rolling 0 / weekly 59 / monthly 74)",
+          "done": true
+        },
+        {
+          "text": "Codex 계약 문서화 + app-server 구현",
+          "done": true
+        },
+        {
+          "text": "Antigravity 경로 확정 (CLI 실행, 자격증명 금지)",
+          "done": true
+        },
+        {
+          "text": "Gemini CLI 제외 근거 정리",
+          "done": true
+        },
+        {
+          "text": "Keychain 접근 검증 (프롬프트 없음 / ad-hoc은 매번 재프롬프트)",
+          "done": true
+        },
+        {
+          "text": "Codex·Antigravity CLI 설치 후 실측 1회 (미설치 — 보류)",
+          "done": false
+        }
+      ]
+    },
+    {
+      "phase": "Phase 1",
+      "title": "MVP",
+      "state": "active",
+      "items": [
+        {
+          "text": "UsageCore 4 provider + 캐시 + 백오프 (63 테스트)",
+          "done": true
+        },
+        {
+          "text": "MenuBarExtra 라벨 + 팝오버 + 상태 카드",
+          "done": true
+        },
+        {
+          "text": "설정 (주기, 표시 윈도우, provider on/off)",
+          "done": true
+        },
+        {
+          "text": "Claude OAuth 읽기 옵트인 (기본 off)",
+          "done": true
+        },
+        {
+          "text": "앱 번들 빌드 (Xcode first-launch 동의 필요)",
+          "done": true
+        }
+      ]
+    },
+    {
+      "phase": "Phase 2",
+      "title": "신뢰성 · UX",
+      "state": "next",
+      "items": [
+        {
+          "text": "알림 80% / 95% / 리셋 임박",
+          "done": false
+        },
+        {
+          "text": "stale 라벨 정교화, 첫 실행 온보딩",
+          "done": false
+        },
+        {
+          "text": "스냅샷 히스토리 → 스파크라인",
+          "done": false
+        },
+        {
+          "text": "Source에 appServer 구분 추가, reset credits 필드",
+          "done": false
+        }
+      ]
+    },
+    {
+      "phase": "Phase 3",
+      "title": "배포",
+      "state": "later",
+      "items": [
+        {
+          "text": "Developer ID 서명 + notarization",
+          "done": false
+        },
+        {
+          "text": "DMG + Homebrew cask",
+          "done": false
+        },
+        {
+          "text": "README 스크린샷, GitHub Releases",
+          "done": false
+        }
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": 1,
+      "question": "알림 기본값",
+      "stance": "80/95% 둘 다, 기본 off"
+    },
+    {
+      "id": 2,
+      "question": "스파크라인",
+      "stance": "v2. 캐시 히스토리는 v1부터 축적"
+    },
+    {
+      "id": 3,
+      "question": "Claude statusLine 훅 전환",
+      "stance": "v1.x 후보 — settings.json 수정 동의 필요"
+    },
+    {
+      "id": 4,
+      "question": "Codex 실측 검증",
+      "stance": "Phase 1 초입"
+    },
+    {
+      "id": 5,
+      "question": "Source가 전략을 구분하지 못함",
+      "stance": "`Source.appServer` 추가 검토"
+    },
+    {
+      "id": 6,
+      "question": "reset credits가 plan 문자열에 붙어 있음",
+      "stance": "전용 필드 추가"
+    },
+    {
+      "id": 7,
+      "question": "실제 앱 화면의 시각 검증",
+      "stance": "화면 기록 권한 미사용 → 사용자 육안 확인 + HTML 목업으로 대체"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "git push 403",
+      "detail": "이 머신의 GitHub 자격증명이 prismslam-cmd 계정이라 ies0411/Fillline 쓰기 권한 없음. 로컬 커밋은 정상.",
+      "action": "GitHub에서 prismslam-cmd를 Write 콜라보레이터로 추가"
+    },
+    {
+      "title": "모델 폴백 체인 없음",
+      "detail": "oh-my-opencode-slim의 `go` 프리셋은 에이전트마다 단일 모델. 429 한 번에 해당 레인이 죽고 재시도/대체가 없음.",
+      "action": "프리셋에 fallback 배열 추가 (oracle: glm→deepseek, designer/fixer: deepseek→glm)"
+    }
+  ],
+  "log": [
+    {
+      "date": "2026-10-21",
+      "text": "Phase 0 스파이크 — Claude Code / OpenCode Go 실측 캡처 성공, Codex·Antigravity 계약 확정, Gemini CLI 영구 제외"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "UsageCore 4 provider 구현 + 63 테스트, CLT `swift test` 무음 통과 함정 발견 → test-local.sh 게이트"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "product 이름 확정: Fillline (경쟁: headroom 등 5곳 선점)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "메뉴바 UI 레인 진행 중 (MenuBarExtra + 팝오버 + 설정)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "UsageApp UI를 4번째 provider(Antigravity)에 연결 — 기본 off, 300초 간격. SwiftUI 소스 타입체크 통과"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "진행 대시보드: 진입 애니메이션이 본문을 반투명으로 남기던 문제 제거, 카드 높이·표 줄바꿈 정리"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "designer 레인 레이트리밋으로 2회 중단. glm-5.3-flash 자체는 정상(추론·툴호출 확인), 실패 모델은 deepseek-v4.1-flash"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "Xcode 라이선스 동의 후 `./Scripts/build.sh` → BUILD SUCCEEDED. Fillline.app 실행, 메뉴바 아이콘 렌더 확인"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "`SnapshotCache` 저장 경로가 구 이름(Application Support/UsageApp)을 쓰던 문제 수정 → Fillline"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "온보딩 화면 표시 확인(사용자 육안). 온보딩 완료 전에는 폴링하지 않는 설계 — 완료 후 첫 값 검증은 내일"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "화면 캡처는 TCC 권한 차단으로 사용하지 않기로 함. 시각 검증은 HTML 목업 + 사용자 확인으로 대체"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "UI 목업은 아직 3-provider 시절 화면 — 4번째 provider 반영은 designer 레인 레이트리밋으로 미완 (내일 재개)"
+    }
+  ]
+}
