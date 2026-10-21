@@ -7,7 +7,7 @@
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
     "version": "v0.2.1-alpha.1",
     "license": "MIT",
-    "commits": 30,
+    "commits": 32,
     "branch": "main",
     "pushed": true,
     "issues": 8,
@@ -494,6 +494,10 @@
     {
       "date": "2026-10-21",
       "text": "앱 아이콘·OG 카드 완성 — 16px에서도 채움선 유지(어두운 챔버 + 16단위 그리드 + 사이즈별 래스터화), 그레이스케일 3:1 통과. 자산 카탈로그로 번들 연결, `CFBundleIconName` 확인"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "수익화 검토 문서 추가 — 소스는 MIT 무료 유지, 수익은 'notarized 빌드·지원'에 부착. 고정비 Apple $99/년을 먼저 넘어야 함"
     }
   ]
 }

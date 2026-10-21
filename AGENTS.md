@@ -247,6 +247,7 @@ docs/status/index.html # `./Scripts/status.sh --open`으로 생성되는 대시�
 docs/marketing/positioning.md   # 누구에게 왜 파는가 + 경쟁 지형 + 금지 문구
 docs/marketing/launch-plan.md   # 게이트, 타임라인, 채널, 반박 대응, 측정
 docs/marketing/copy.md          # 재사용 카피 뱅크(EN/KO): HN·Reddit·X·PH·FAQ
+docs/marketing/monetization.md  # 수익화 후보·가격·순서·법/세무·하지 말 것
 docs/marketing/assets/          # 아이콘·OG 카드·스크린샷·GIF (원본 SVG 포함)
 ```
 
