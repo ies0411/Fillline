@@ -904,10 +904,11 @@
     <symbol id="i-bolt" viewBox="0 0 24 24">
       <path d="M13.2 2.5L5 13.6h5.4L9.8 21.5 19 10.2h-5.6l-.2-7.7z" fill="currentColor"/>
     </symbol>
-    <!-- Antigravity: something held off the ground. Ball above a lift pad. -->
+    <!-- Antigravity: something held off the ground — ball clear of its pad.
+         Filled, like the bolt, so it keeps its ink at menu-bar size. -->
     <symbol id="i-lift" viewBox="0 0 24 24">
-      <circle cx="12" cy="6.6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M5 19.6c0-2.4 3.1-4.1 7-4.1s7 1.7 7 4.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="12" cy="6.4" r="3.6" fill="currentColor"/>
+      <rect x="5" y="16.4" width="14.2" height="3.7" rx="1.85" fill="currentColor"/>
     </symbol>
     <symbol id="i-clock" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.7"/>
@@ -1002,7 +1003,7 @@
     </div>
     <div class="legend-item">
       <div class="legend-mark"><span class="status" style="font-size:8px">Opt-in</span></div>
-      <div><h3>Off until asked</h3><p>Antigravity ships off. When it is on, the card says so in one small word — not a banner.</p></div>
+      <div><h3>Off until asked</h3><p>Antigravity ships off. Its last line leads with that fact — a phrase, not a banner.</p></div>
     </div>
   </section>
 
@@ -1409,7 +1410,7 @@
               </div>
               <div class="card-foot">
                 <svg class="icon"><use href="#i-code"/></svg>
-                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                <span>Off by default · local <code>agy</code> · no Google credentials read</span>
               </div>
             </article>
 
@@ -1589,7 +1590,7 @@
               </div>
               <div class="card-foot">
                 <svg class="icon"><use href="#i-code"/></svg>
-                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                <span>Off by default · local <code>agy</code> · no Google credentials read</span>
               </div>
             </article>
 
@@ -1749,7 +1750,7 @@
               </div>
               <div class="card-foot">
                 <svg class="icon"><use href="#i-code"/></svg>
-                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                <span>Off by default · local <code>agy</code> · no Google credentials read</span>
               </div>
             </article>
 
@@ -1908,7 +1909,7 @@
               </div>
               <div class="card-foot">
                 <svg class="icon"><use href="#i-code"/></svg>
-                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                <span>Off by default · local <code>agy</code> · no Google credentials read</span>
               </div>
             </article>
 
@@ -2074,7 +2075,7 @@
               </div>
               <div class="card-foot">
                 <svg class="icon"><use href="#i-code"/></svg>
-                <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                <span>Off by default · local <code>agy</code> · no Google credentials read</span>
               </div>
             </article>
 
@@ -2318,7 +2319,7 @@
                 </div>
                 <div class="card-foot">
                   <svg class="icon"><use href="#i-code"/></svg>
-                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                  <span>Off by default · local <code>agy</code> · no Google credentials read</span>
                 </div>
               </article>
 
@@ -2498,7 +2499,7 @@
                 </div>
                 <div class="card-foot">
                   <svg class="icon"><use href="#i-code"/></svg>
-                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                  <span>Off by default · local <code>agy</code> · no Google credentials read</span>
                 </div>
               </article>
 
@@ -2656,7 +2657,7 @@
                 </div>
                 <div class="card-foot">
                   <svg class="icon"><use href="#i-code"/></svg>
-                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                  <span>Off by default · local <code>agy</code> · no Google credentials read</span>
                 </div>
               </article>
 
@@ -2822,7 +2823,7 @@
                 </div>
                 <div class="card-foot">
                   <svg class="icon"><use href="#i-code"/></svg>
-                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                  <span>Off by default · local <code>agy</code> · no Google credentials read</span>
                 </div>
               </article>
 
@@ -2980,7 +2981,7 @@
                 </div>
                 <div class="card-foot">
                   <svg class="icon"><use href="#i-code"/></svg>
-                  <span>Runs <code>agy</code> locally · opt-in · no Google credentials read</span>
+                  <span>Off by default · local <code>agy</code> · no Google credentials read</span>
                 </div>
               </article>
 
@@ -3080,7 +3081,7 @@
       </div>
       <div class="note wide">
         <h3>Four providers, one reading</h3>
-        <p>Claude Code, Codex and OpenCode Go report a <em>used</em> percentage; Antigravity reports a <em>remaining</em> fraction (0–1). All four are normalised to the same reading — remaining percent, floored — so the eye never has to invert anything and no provider gets its own layout. The differences are confined, not hidden: Antigravity's card carries a last line naming its source, a local <span class="k">agy</span> run, so it cannot be mistaken for a network call and never implies a Google credential is read. It is also the only card that says "opt-in".</p>
+        <p>Claude Code, Codex and OpenCode Go report a <em>used</em> percentage; Antigravity reports a <em>remaining</em> fraction (0–1). All four are normalised to the same reading — remaining percent, floored — so the eye never has to invert anything and no provider gets its own layout. The differences are confined, not hidden: Antigravity's card carries a last line naming its source, a local <span class="k">agy</span> run, so it cannot be mistaken for a network call and never implies a Google credential is read. It is also the only card whose last line names its default: off.</p>
       </div>
     </div>
   </section>
