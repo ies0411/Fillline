@@ -17,6 +17,10 @@ broken parser ships as a patch release.
   `N resets` on the card, instead of being appended to the plan string.
 - Antigravity provider that runs `agy -p /usage --output-format json` and parses its report
   (opt-in, off by default, 300 s floor, no credential access).
+- Quota alerts: `NotificationPlanner` in `UsageCore` decides when a window reaches 80% or
+  95% or is about to reset, and the app delivers them through `UNUserNotificationCenter`.
+  Off by default; permission is requested only when the master toggle is switched on, and
+  each window alerts once per reset cycle (deduped across relaunches for 48 h).
 
 ## [0.1.0-alpha.1] — 2026-10-21
 

@@ -13,6 +13,7 @@ struct SettingsView: View {
             refreshSection(pollInterval: $bindable.pollInterval)
             menuBarSection(number: $bindable.menuBarNumber, style: $bindable.menuBarStyle)
             providersSection
+            notificationsSection(enabled: $bindable.notificationsEnabled)
             claudeSection(oauthEnabled: $bindable.claudeOAuthReadEnabled)
             startupSection
             aboutSection
@@ -128,6 +129,26 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
         }
     }
+
+    // MARK: Notifications
+
+    private func notificationsSection(enabled: Binding<Bool>) -> some View {
+        Section("Notifications") {
+            Toggle("Alert me before I hit a limit", isOn: enabled)
+
+            Text("Off by default. Alerts fire at 80% and 95% of a window, and shortly before a reset. Each window alerts once per reset cycle.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            if model.notificationsPermissionDenied {
+                Text("macOS is blocking notifications for Fillline. Allow them in System Settings → Notifications.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    // MARK: Claude Code
 
     private func claudeSection(oauthEnabled: Binding<Bool>) -> some View {
         Section("Claude Code") {

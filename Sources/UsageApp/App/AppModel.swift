@@ -145,6 +145,23 @@ final class AppModel {
         }
     }
 
+    /// Master switch for alerts. Off by default (AGENTS §10 #2); switching it on is the
+    /// only thing in the app that ever shows the macOS permission prompt.
+    var notificationsEnabled: Bool {
+        didSet {
+            guard oldValue != notificationsEnabled else { return }
+            defaults.set(notificationsEnabled, forKey: Keys.notificationsEnabled)
+            guard notificationsEnabled else { return }
+            Task { [weak self] in
+                await self?.requestNotificationAuthorization()
+            }
+        }
+    }
+
+    /// `true` once the system (or the user) has refused notifications, so Settings can
+    /// explain why the toggle produces nothing.
+    private(set) var notificationsPermissionDenied = false
+
     private(set) var hasCompletedOnboarding: Bool {
         didSet {
             guard oldValue != hasCompletedOnboarding else { return }
@@ -156,6 +173,11 @@ final class AppModel {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let cache: SnapshotCache
+    @ObservationIgnored private let notifier: any NotificationDelivering
+    @ObservationIgnored private let notificationKeys: NotificationKeyStore
+    /// Stateless and `Sendable`; the deciding rules live in `UsageCore` so they are tested
+    /// without UserDefaults or UserNotifications.
+    @ObservationIgnored private let notificationPlanner = NotificationPlanner()
     @ObservationIgnored private var scheduler: PollScheduler
     @ObservationIgnored private var loopTask: Task<Void, Never>?
     @ObservationIgnored private var manualRefreshTask: Task<Void, Never>?
@@ -169,12 +191,18 @@ final class AppModel {
     /// `agy` is a cold-start subprocess (~seconds), so poll it far less often.
     private static let antigravityMinimumInterval: TimeInterval = 300
 
-    init(defaults: UserDefaults = .standard) {
+    init(
+        defaults: UserDefaults = .standard,
+        notifier: any NotificationDelivering = UserNotificationDelivering()
+    ) {
         self.defaults = defaults
         self.cache = SnapshotCache()
+        self.notifier = notifier
+        self.notificationKeys = NotificationKeyStore(defaults: defaults)
         self.scheduler = PollScheduler(providers: [], configuration: .init())
 
         self.claudeOAuthReadEnabled = defaults.bool(forKey: Keys.claudeOAuthReadEnabled)
+        self.notificationsEnabled = defaults.bool(forKey: Keys.notificationsEnabled)
         self.pollInterval = PollInterval(rawValue: defaults.integer(forKey: Keys.pollInterval)) ?? .balanced
         self.menuBarStyle = MenuBarLabelStyle(rawValue: defaults.string(forKey: Keys.menuBarStyle) ?? "") ?? .all
         self.menuBarNumber = MenuBarNumber(rawValue: defaults.string(forKey: Keys.menuBarNumber) ?? "") ?? .primary
@@ -340,6 +368,7 @@ final class AppModel {
         if didChange {
             await persist()
         }
+        notifyIfNeeded()
     }
 
     /// Manual refresh: sets a spinner, never blocks the popover, never clears numbers.
@@ -471,6 +500,51 @@ final class AppModel {
         }
     }
 
+    // MARK: Notifications
+
+    private func requestNotificationAuthorization() async {
+        let granted = await notifier.requestAuthorization()
+        notificationsPermissionDenied = !granted
+    }
+
+    /// Evaluates alerts after every pass. Runs on the main actor because the planner and
+    /// the key store are cheap; only the delivery itself is async.
+    ///
+    /// Keys are recorded *before* delivery so two overlapping passes can never send the
+    /// same threshold twice.
+    private func notifyIfNeeded() {
+        guard notificationsEnabled, !notificationsPermissionDenied else { return }
+
+        // Same visibility rules as the cards: a disabled provider, or Claude without the
+        // read opt-in, must not alert.
+        let visible = orderedProviders.compactMap { snapshot(for: $0) }
+        guard !visible.isEmpty else { return }
+
+        let now = Date()
+        let decisions = notificationPlanner.decisions(
+            for: visible,
+            now: now,
+            alreadyNotified: notificationKeys.keys()
+        )
+        guard !decisions.isEmpty else { return }
+
+        var payloads: [NotificationPayload] = []
+        for decision in decisions {
+            notificationKeys.insert(notificationPlanner.key(for: decision, in: visible), at: now)
+            if let payload = NotificationCopy.payload(for: decision, in: visible, now: now) {
+                payloads.append(payload)
+            }
+        }
+        guard !payloads.isEmpty else { return }
+
+        let notifier = self.notifier
+        Task {
+            for payload in payloads {
+                await notifier.deliver(payload)
+            }
+        }
+    }
+
     // MARK: Defaults keys
 
     private enum Keys {
@@ -480,6 +554,7 @@ final class AppModel {
         static let menuBarNumber = "menuBarNumber"
         static let enabledProviders = "enabledProviders"
         static let onboardingComplete = "hasCompletedOnboarding"
+        static let notificationsEnabled = "notificationsEnabled"
     }
 }
 

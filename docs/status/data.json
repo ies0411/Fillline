@@ -25,8 +25,8 @@
     },
     {
       "label": "테스트",
-      "value": "63",
-      "sub": "10 suites · fixture 기반 · 전부 통과"
+      "value": "93",
+      "sub": "12 suites · fixture 기반 · 전부 통과"
     },
     {
       "label": "의존성",
@@ -225,7 +225,7 @@
       "state": "active",
       "items": [
         {
-          "text": "UsageCore 4 provider + 캐시 + 백오프 (63 테스트)",
+          "text": "UsageCore 4 provider + 캐시 + 백오프 (93 테스트)",
           "done": true
         },
         {
@@ -253,7 +253,7 @@
       "items": [
         {
           "text": "알림 80% / 95% / 리셋 임박",
-          "done": false
+          "done": true
         },
         {
           "text": "stale 라벨 정교화, 첫 실행 온보딩",
@@ -429,6 +429,10 @@
     {
       "date": "2026-10-21",
       "text": "Codex app-server 미인증 응답(-32600)을 `.needsLogin`으로 매핑하고 HTTP 폴백 중단 — 실측 근거는 이슈 #1 코멘트"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "알림(이슈 #4) 구현 — `NotificationPlanner`(순수 코어: 80%·95%·리셋 임박, 리셋 사이클 단위 중복 방지) + `UNUserNotificationCenter` 배선. 기본 off, 테스트 93개"
     }
   ]
 }
