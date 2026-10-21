@@ -36,8 +36,9 @@ public enum CodexAppServerError: Error, Sendable, Hashable {
     case incompleteResponse
     /// The reply was not the documented shape.
     case malformedResponse
-    /// JSON-RPC error reply. `code` is numeric only.
-    case rpcError(code: Int)
+    /// JSON-RPC error reply. Only the numeric code and a single classified flag are kept:
+    /// the message text itself is never stored or propagated (AGENTS §4).
+    case rpcError(code: Int, isAuthenticationRequired: Bool = false)
 }
 
 /// Documented strategy: `codex app-server --listen stdio://` → `account/rateLimits/read`.

@@ -58,9 +58,24 @@ struct ProviderCard: View {
                 PlanBadge(plan: plan)
             }
 
+            if let resetCredits = snapshot?.resetCredits, resetCredits > 0 {
+                Text(resetCredits == 1 ? "1 reset" : "\(resetCredits) resets")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .accessibilityLabel(
+                        Text(
+                            resetCredits == 1
+                                ? "1 limit reset available"
+                                : "\(resetCredits) limit resets available"
+                        )
+                    )
+            }
+
             Spacer(minLength: 4)
 
-            if let source = snapshot?.source, source != .api {
+            if let source = snapshot?.source, showsSourceBadge(source) {
                 SourceBadge(source: source)
             }
 
@@ -69,6 +84,15 @@ struct ProviderCard: View {
             }
         }
         .accessibilityElement(children: .combine)
+    }
+
+    /// `api` is the default path and says nothing new; every other source changes how the
+    /// number should be read, so the card names it.
+    private func showsSourceBadge(_ source: Source) -> Bool {
+        switch source {
+        case .appServer, .localLogs, .cache: true
+        case .api: false
+        }
     }
 
     private func windows(_ snapshot: UsageSnapshot) -> some View {

@@ -433,6 +433,7 @@ final class AppModel {
             snapshots[provider] = UsageSnapshot(
                 provider: provider,
                 plan: snapshot.plan ?? existing.plan,
+                resetCredits: snapshot.resetCredits ?? existing.resetCredits,
                 windows: existing.windows,
                 source: existing.source,
                 status: snapshot.status,

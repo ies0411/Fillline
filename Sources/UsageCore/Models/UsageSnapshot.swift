@@ -10,6 +10,9 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
 
     public let provider: ProviderID
     public let plan: String?
+    /// Provider-granted limit resets still available (Codex `rateLimitResetCredits`).
+    /// `nil` means "not reported", never zero (AGENTS §10 #9).
+    public let resetCredits: Int?
     public let windows: [LimitWindow]
     public let source: Source
     public let status: ProviderStatus
@@ -18,6 +21,7 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
     public init(
         provider: ProviderID,
         plan: String?,
+        resetCredits: Int? = nil,
         windows: [LimitWindow],
         source: Source,
         status: ProviderStatus,
@@ -25,6 +29,7 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
     ) {
         self.provider = provider
         self.plan = plan
+        self.resetCredits = resetCredits
         self.windows = windows
         self.source = source
         self.status = status
@@ -57,6 +62,7 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
         UsageSnapshot(
             provider: provider,
             plan: plan,
+            resetCredits: resetCredits,
             windows: windows,
             source: source,
             status: newStatus,

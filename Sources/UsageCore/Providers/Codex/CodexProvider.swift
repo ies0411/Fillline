@@ -17,7 +17,8 @@ extension CodexStrategy {
 ///
 /// The app-server path does not read tokens at all — the CLI owns its login. The HTTP path uses
 /// the local ChatGPT login from `~/.codex/auth.json`; no token refresh happens anywhere
-/// (AGENTS §2), and both successes report `Source.api`.
+/// (AGENTS §2). Each success reports the source that produced it: `.appServer` for the
+/// documented RPC, `.api` for the undocumented HTTP endpoint (AGENTS §10 #8).
 public struct CodexProvider: UsageProvider {
     public let id: ProviderID = .codex
 
@@ -50,6 +51,8 @@ public struct CodexProvider: UsageProvider {
                 attempt = await fetchHTTP(now: now)
             }
             if attempt.status.isSuccess { return attempt }
+            // A missing login is terminal: every remaining strategy uses the same credential.
+            if case .needsLogin = attempt.status { return attempt }
             lastFailure = attempt
         }
 
@@ -72,9 +75,10 @@ public struct CodexProvider: UsageProvider {
             }
             return UsageSnapshot(
                 provider: id,
-                plan: response.planDescription,
+                plan: response.reportedPlanType,
+                resetCredits: response.resetCreditCount,
                 windows: windows,
-                source: .api,
+                source: .appServer,
                 status: .ok,
                 capturedAt: now
             )
@@ -108,8 +112,10 @@ public struct CodexProvider: UsageProvider {
             .error("app-server-incomplete")
         case .malformedResponse:
             .error("app-server-malformed")
-        case .rpcError(let code):
-            .error("app-server-rpc-\(abs(code))")
+        case let .rpcError(code, isAuthenticationRequired):
+            // An unauthenticated app-server is a login state, not a transport failure: falling
+            // through to the HTTP strategy would only produce the same 401 one step later.
+            isAuthenticationRequired ? .needsLogin : .error("app-server-rpc-\(abs(code))")
         }
     }
 
@@ -189,6 +195,8 @@ public struct CodexProvider: UsageProvider {
             return UsageSnapshot(
                 provider: id,
                 plan: decoded.planType,
+                // The wham/usage payload carries no reset-credit array.
+                resetCredits: nil,
                 windows: windows,
                 source: .api,
                 status: .ok,

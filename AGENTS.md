@@ -290,8 +290,8 @@ docs/status/index.html # `./Scripts/status.sh --open`으로 생성되는 대시�
 | 5 | 앱 이름/번들 ID | 임시 `Fillline` / `dev.ies0411.fillline`. **상표 리스크로 "Claude"/"Codex"/"OpenCode"를 제품명에 쓰지 않는다** |
 | 6 | Claude를 statusLine 훅(문서화 경로)으로 전환할지 | v1.x 후보. `~/.claude/settings.json` 수정이 필요해 명시 동의 필요 |
 | 7 | Codex 실측 검증 시점 | Phase 1 초입 (CLI 설치 후) |
-| 8 | `Source`가 전략을 구분하지 못함 (Codex app-server vs 내부 HTTP 모두 `.api`) | `Source.appServer` 추가 검토 — UI가 "문서화된 경로"인지 표시할 수 있어야 함. 모델 변경이라 UI 레인 종료 후 |
-| 9 | `reset credits`가 plan 문자열에 붙어 있음 | `UsageSnapshot`에 전용 필드 추가 (UI에서 배지로 표시) |
+| 8 | `Source`가 전략을 구분하지 못함 (Codex app-server vs 내부 HTTP 모두 `.api`) | ✅ 해결 (2026-10-21): `Source.appServer` 추가 — `isDocumented`/`isLive`로 문서화 경로를 UI에 표시 |
+| 9 | `reset credits`가 plan 문자열에 붙어 있음 | ✅ 해결 (2026-10-21): `UsageSnapshot.resetCredits` 전용 필드 추가, 카드에 `N resets` 표시 |
 
 ---
 

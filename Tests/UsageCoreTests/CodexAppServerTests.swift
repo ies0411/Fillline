@@ -145,9 +145,10 @@ struct CodexAppServerTests {
         let snapshot = await provider(runner: runner, http: http).fetch(now: now)
 
         #expect(snapshot.status == .ok)
-        #expect(snapshot.source == .api)
-        // Reset credits ride along in the plan string: `UsageSnapshot` has no dedicated field.
-        #expect(snapshot.plan == "plus · 2 reset credits")
+        #expect(snapshot.source == .appServer)
+        // Credits live in their own field now; the plan string stays a plain plan name.
+        #expect(snapshot.plan == "plus")
+        #expect(snapshot.resetCredits == 2)
         #expect(snapshot.windows.count == 4)
 
         let session = try #require(snapshot.window(kind: .session5h))
@@ -313,7 +314,8 @@ struct CodexAppServerTests {
             (.ioFailed, .error("app-server-io")),
             (.incompleteResponse, .error("app-server-incomplete")),
             (.malformedResponse, .error("app-server-malformed")),
-            (.rpcError(code: -32601), .error("app-server-rpc-32601"))
+            (.rpcError(code: -32601), .error("app-server-rpc-32601")),
+            (.rpcError(code: -32600, isAuthenticationRequired: true), .needsLogin)
         ]
         for (error, expected) in cases {
             let snapshot = await provider(
@@ -323,6 +325,27 @@ struct CodexAppServerTests {
             #expect(snapshot.status == expected)
             #expect(snapshot.windows.isEmpty)
         }
+    }
+
+    @Test("an unauthenticated app-server is a login state, not a transport fallback")
+    func appServerAuthRequiredIsNeedsLogin() async throws {
+        // Captured from `codex-cli 0.163.0` with no logged-in account.
+        let lines = [
+            #"{"id":1,"result":{"userAgent":"Fillline/0.163.0 (macOS)","platformFamily":"unix"}}"#,
+            #"{"id":2,"error":{"code":-32600,"message":"codex account authentication required to read rate limits"}}"#
+        ]
+        let fixture = try TestFixtures.data("codex_usage")
+        let http = ScriptedHTTPClient([.init(statusCode: 200, body: fixture)])
+
+        let snapshot = await provider(
+            runner: FakeCodexProcessRunner(lines: lines),
+            http: http,
+            strategies: [.appServer, .http]
+        ).fetch(now: now)
+
+        #expect(snapshot.status == .needsLogin)
+        let httpCalls = await http.callCount
+        #expect(httpCalls == 0)
     }
 
     @Test("an RPC error reply surfaces only its numeric code, never the message")

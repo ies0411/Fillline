@@ -15,8 +15,10 @@ Provider ID: `codex`
 
 Implemented in `Sources/UsageCore/Providers/Codex/` as `CodexStrategy.defaultOrder = [.appServer, .http]`:
 strategy 1 is tried first, a missing `codex` binary is a typed `.notInstalled` that falls through to
-strategy 2, and if everything fails the **last** failure is surfaced. Both strategies currently report
-`Source.api`, so the UI cannot yet say which one won (tracked in AGENTS §10).
+strategy 2, and if everything fails the **last** failure is surfaced. Every success records the source
+that actually produced the numbers — `Source.appServer` for the documented RPC (badged "app server"),
+`Source.api` for the HTTP fallback — so the card never implies the documented path won when it didn't.
+A local JSONL fallback, when added, reports `Source.localLogs`.
 
 ## Credential
 
@@ -87,8 +89,9 @@ Mapping:
 - `windowMinutes` 300 → `session5h`, 10080 → `weekly7d`, anything else → `Kind.rolling` with a
   human label (`3h`, `2d`). `rateLimitsByLimitId` keys other than the default get a ` (other)` suffix.
 - `credits.balance` surfaces only when `hasCredits && !unlimited`, as a `Credits · N` window with no
-  fraction. `rateLimitResetCredits.availableCount` is appended to the plan string
-  (`"plus · 2 reset credits"`) because `UsageSnapshot` has no dedicated field yet.
+  fraction. `rateLimitResetCredits.availableCount` goes in `UsageSnapshot.resetCredits` (positive
+  counts only; absent → `nil`, never `0`) and the card renders it as `2 resets` beside the plan.
+  `plan` stays the bare reported value (`plus`) — reset credits are never concatenated into it.
 - RPC failures are reduced to stable codes (`app-server-rpc-<abs code>`) — message text never reaches
   the UI or logs.
 

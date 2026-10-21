@@ -11,12 +11,12 @@ broken parser ships as a patch release.
 
 ### Added
 - Codex `app-server` strategy (`account/rateLimits/read`) preferred over the internal HTTP endpoint.
+- `Source.appServer`: snapshots now record which Codex strategy produced them, so the card can
+  badge the documented path instead of reporting `api` for everything.
+- `UsageSnapshot.resetCredits`: Codex reset-credit availability is a real field, shown as
+  `N resets` on the card, instead of being appended to the plan string.
 - Antigravity provider that runs `agy -p /usage --output-format json` and parses its report
   (opt-in, off by default, 300 s floor, no credential access).
-
-### Changed
-- `UsageSnapshot.source` cannot yet distinguish app-server from HTTP; see AGENTS.md §10 #8.
-- Reset-credit availability currently rides in the plan string; see AGENTS.md §10 #9.
 
 ## [0.1.0-alpha.1] — 2026-10-21
 

@@ -86,17 +86,36 @@ struct SourceBadge: View {
             .font(.system(size: 8.5, weight: .medium))
             .tracking(0.5)
             .textCase(.uppercase)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(tint)
+            .lineLimit(1)
+            .fixedSize()
             .padding(.horizontal, 5)
             .padding(.vertical, 2)
             .overlay(Capsule().strokeBorder(Color.primary.opacity(0.12), lineWidth: 1))
+            .accessibilityLabel(Text(accessibilityText))
     }
 
     private var label: String {
         switch source {
         case .api: "Live"
+        case .appServer: "App server"
         case .localLogs: "Estimated"
         case .cache: "Cached"
         }
+    }
+
+    private var accessibilityText: String {
+        switch source {
+        case .api: "Live provider API"
+        case .appServer: "From the documented app-server interface"
+        case .localLogs: "Estimated from local logs"
+        case .cache: "Cached, last known values"
+        }
+    }
+
+    /// The documented app-server path is a healthy live reading, so it keeps the calm tone of
+    /// normal values; the remaining sources stay quiet secondary text.
+    private var tint: Color {
+        source.isDocumented ? .primary : .secondary
     }
 }

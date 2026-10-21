@@ -141,14 +141,18 @@ extension CodexAppServerResponse {
     /// Extracts the reply to `responseID` from the newline-delimited message stream.
     ///
     /// Non-JSON lines (some CLIs print warnings to stdout) and unrelated messages are ignored.
-    /// A JSON-RPC error surfaces only its numeric code; message text is never propagated
-    /// (it can echo request state and would end up in logs/UI, AGENTS §4).
+    /// A JSON-RPC error surfaces only its numeric code plus one classified bit: the message text
+    /// is inspected for an auth failure and then discarded, because it can echo request state and
+    /// would end up in logs/UI (AGENTS §4).
     static func decode(lines: [String], responseID: Int) throws -> CodexAppServerResponse {
         for line in lines {
             guard let object = jsonObject(line), Self.integer(object["id"]) == responseID else { continue }
 
             if let error = object["error"] as? [String: Any] {
-                throw CodexAppServerError.rpcError(code: Self.integer(error["code"]) ?? 0)
+                throw CodexAppServerError.rpcError(
+                    code: Self.integer(error["code"]) ?? 0,
+                    isAuthenticationRequired: Self.isAuthenticationMessage(error["message"])
+                )
             }
             guard let result = object["result"], JSONSerialization.isValidJSONObject(result),
                   let data = try? JSONSerialization.data(withJSONObject: result),
@@ -173,6 +177,17 @@ extension CodexAppServerResponse {
         default: nil
         }
     }
+
+    /// Classifies a JSON-RPC error message without keeping it.
+    ///
+    /// Observed on `codex-cli 0.163.0` when nobody is logged in:
+    /// `{"error":{"code":-32600,"message":"codex account authentication required to read rate limits"}}`
+    static func isAuthenticationMessage(_ value: Any?) -> Bool {
+        guard let text = (value as? String)?.lowercased() else { return false }
+        return text.contains("authentication required")
+            || text.contains("not logged in")
+            || text.contains("login required")
+    }
 }
 
 // MARK: - Mapping to windows
@@ -185,21 +200,11 @@ extension CodexAppServerResponse {
             ?? rateLimitsByLimitID?.values.compactMap(\.planType).first
     }
 
-    /// Only positive counts are worth surfacing.
+    /// Only positive counts are worth surfacing. Absent/zero → `nil`, so the UI never claims a
+    /// reset the account does not have.
     var resetCreditCount: Int? {
         guard let count = rateLimitResetCredits?.availableCount, count > 0 else { return nil }
         return count
-    }
-
-    /// `UsageSnapshot` has no field for reset credits, so they ride along in the plan string
-    /// (`"plus · 2 reset credits"`). Keep the wording stable — the UI renders it verbatim.
-    var planDescription: String? {
-        switch (reportedPlanType, resetCreditCount) {
-        case let (plan?, count?): "\(plan) · \(count) reset credits"
-        case let (plan?, nil): plan
-        case let (nil, count?): "\(count) reset credits"
-        case (nil, nil): nil
-        }
     }
 
     /// Maps every bucket onto `LimitWindow`s. Returns an empty array when the server reports
