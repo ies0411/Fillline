@@ -391,6 +391,10 @@
     {
       "date": "2026-10-21",
       "text": "커밋 계정과 push 자격증명 분리: 작성자는 항상 ies0411, push는 레포 전용 SSH 별칭 사용"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "GitHub 제품 관리 셋업 시작: CHANGELOG(Keep a Changelog) + 릴리스 노트 카테고리(`.github/release.yml`) 추가"
     }
   ]
 }

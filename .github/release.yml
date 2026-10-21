@@ -1,0 +1,20 @@
+# Release notes categories.
+# Labels drive the generated notes; a PR without a label falls into "Other changes".
+changelog:
+  categories:
+    - title: Breaking changes
+      labels: [breaking]
+    - title: Providers
+      labels: [area:provider, provider:claude-code, provider:codex, provider:opencode-go, provider:antigravity]
+    - title: Features
+      labels: [type:feat]
+    - title: Fixes
+      labels: [type:fix]
+    - title: Documentation
+      labels: [type:docs]
+    - title: Tooling and CI
+      labels: [area:tooling, type:chore]
+    - title: Other changes
+      labels: ["*"]
+  exclude:
+    labels: [skip-changelog]
