@@ -7,7 +7,7 @@
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
     "version": "0.1.0",
     "license": "MIT",
-    "commits": 17,
+    "commits": 20,
     "branch": "main",
     "pushed": true,
     "issues": 8,
@@ -452,6 +452,10 @@
     {
       "date": "2026-10-21",
       "text": "Codex `<>` 글리프 optical weight 수정 — stroke 3 + butt cap으로 1×에서 ink 8.6%→15.3% (이슈 #8 종료)"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "스냅샷 히스토리 코어 추가 — `history.json` (버전드 payload, 시리즈별 상한·7일 보존, 원자적 쓰기). 테스트 109개"
     }
   ]
 }
