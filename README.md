@@ -25,7 +25,13 @@ third-party dependencies.
   used in memory, and never written back. Refreshing a token would rotate it and break the
   CLI that owns it, so if a token is expired the card says `needs login` and asks you to run
   the CLI once.
-- **Notifications** at 80% and 95% of a window, and shortly before a reset.
+- **Notifications** at 80% and 95% of a window, and shortly before a reset. Off by default;
+  permission is only requested when you switch them on, and each window alerts once per reset cycle.
+- **A seven-day trail per card.** A quiet line shows where the number has been, on a fixed
+  `0…1` scale so a small wobble can never be drawn as a cliff. Hidden until there are two samples.
+- **Provenance, not just numbers.** When Codex answers over its documented `app-server` interface
+  the card says so; the internal HTTP fallback is badged differently. Reset credits appear as
+  `N resets`.
 
 ## How it gets your numbers
 
@@ -82,6 +88,10 @@ and not planned.
   in memory, and discarded. The app never writes to `~/.claude`, `~/.codex`, or
   `~/.config/opencode`, and it never refreshes a token — that would rotate the credential
   and break the CLI that owns it.
+- **Local history is percentages only.** To draw the seven-day trail the app keeps
+  `~/Library/Application Support/Fillline/history.json`: provider, window, timestamp, and the
+  used fraction. No prompts, no responses, no account identifiers. It is pruned to 7 days and
+  you can delete the file at any time; it is never uploaded.
 - **Not sandboxed, and not on the Mac App Store.** Reading `~/.claude`, `~/.codex`, and
   pre-existing Keychain items requires it, so the app ships outside the App Store (Developer
   ID signed, notarized DMG). That trade-off is documented on purpose — review the source
