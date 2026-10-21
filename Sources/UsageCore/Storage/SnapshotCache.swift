@@ -17,13 +17,13 @@ public actor SnapshotCache {
         self.fileURL = directory.appendingPathComponent(fileName, isDirectory: false)
     }
 
-    /// `~/Library/Application Support/UsageApp` (AGENTS §3).
+    /// `~/Library/Application Support/Fillline` (AGENTS §3).
     public static var defaultDirectory: URL {
         if let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            return base.appendingPathComponent("UsageApp", isDirectory: true)
+            return base.appendingPathComponent("Fillline", isDirectory: true)
         }
         return FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Application Support/UsageApp", isDirectory: true)
+            .appendingPathComponent("Library/Application Support/Fillline", isDirectory: true)
     }
 
     /// Non-throwing by design: a corrupt or missing cache must never block startup.
