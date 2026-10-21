@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fillline — GitHub social preview (1280 x 640)
+
+  Two columns on paper. Left: the lockup and the promise. Right: one honest meter, drawn
+  from the same numbers the popover draws — no window chrome, no invented UI, no fake
+  screenshot. The rust rule along the bottom edge is the card's own fill line: everything
+  on the card sits above it.
+
+  The mark in the lockup is the app-icon master (app-icon-source.svg) embedded at 1:8.4
+  with its ids prefixed "ic-". If the icon changes, replace that block — it is a copy, not
+  a link, so the card stays a single self-contained file.
+
+  Colours: paper #F2EFE8, ink #1A1915, rust #A6432A, muted #5F5B53, tertiary #8D877C.
+  Type: New York (serif) for the name, SF Pro for the promise, SF Mono for labels.
+  Read at 600 px wide, the name is 50 px and the promise 13.6 px; the mono eyebrows are
+  decorative at that size.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img">
+  <title>Fillline — see how much AI coding quota you have left, before you hit the wall</title>
+  <defs>
+    <pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.7" fill="#1A1915" opacity="0.06"/>
+    </pattern>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F8F5EF"/>
+      <stop offset="1" stop-color="#ECE8DE"/>
+    </linearGradient>
+    <linearGradient id="fill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#B84E2E"/>
+      <stop offset="1" stop-color="#A6432A"/>
+    </linearGradient>
+    <linearGradient id="ic-plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#332D26"/>
+      <stop offset="0.40" stop-color="#1F1C18"/>
+      <stop offset="1" stop-color="#100F0C"/>
+    </linearGradient>
+
+    <radialGradient id="ic-lamp" cx="0.5" cy="0.74" r="0.54">
+      <stop offset="0" stop-color="#A6432A" stop-opacity="0.26"/>
+      <stop offset="0.60" stop-color="#A6432A" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#A6432A" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="ic-liquid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C85F39"/>
+      <stop offset="0.32" stop-color="#C05B36"/>
+      <stop offset="1" stop-color="#A6432A"/>
+    </linearGradient>
+
+    <radialGradient id="ic-sheen" cx="0.5" cy="1" r="1">
+      <stop offset="0" stop-color="#C85F39" stop-opacity="0.30"/>
+      <stop offset="0.55" stop-color="#C85F39" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#C85F39" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="ic-fill" x1="0" y1="384" x2="0" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FEFBF4"/>
+      <stop offset="0.30" stop-color="#F5F2EA"/>
+      <stop offset="1" stop-color="#DAD3C2"/>
+    </linearGradient>
+
+    <linearGradient id="ic-rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.34"/>
+      <stop offset="0.26" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="ic-glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#080706" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#080706" stop-opacity="0.12"/>
+    </linearGradient>
+
+    <clipPath id="ic-tileClip">
+      <path d="M 1024.00 512.00 C 1024.00 582.42 1023.37 675.83 1022.09 723.25 C 1020.81 770.66 1018.91 775.49 1016.34 796.48 C 1013.77 817.47 1010.57 833.49 1006.68 849.21 C 1002.78 864.92 998.24 878.21 992.96 890.78 C 987.68 903.35 981.74 914.35 974.98 924.62 C 968.21 934.89 960.77 943.99 952.38 952.38 C 943.99 960.77 934.89 968.21 924.62 974.98 C 914.35 981.74 903.35 987.68 890.78 992.96 C 878.21 998.24 864.92 1002.78 849.21 1006.68 C 833.49 1010.57 817.47 1013.77 796.48 1016.34 C 775.49 1018.91 770.66 1020.81 723.25 1022.09 C 675.83 1023.37 582.42 1024.00 512.00 1024.00 C 441.58 1024.00 348.17 1023.37 300.75 1022.09 C 253.34 1020.81 248.51 1018.91 227.52 1016.34 C 206.53 1013.77 190.51 1010.57 174.79 1006.68 C 159.08 1002.78 145.79 998.24 133.22 992.96 C 120.65 987.68 109.65 981.74 99.38 974.98 C 89.11 968.21 80.01 960.77 71.62 952.38 C 63.23 943.99 55.79 934.89 49.02 924.62 C 42.26 914.35 36.32 903.35 31.04 890.78 C 25.76 878.21 21.22 864.92 17.32 849.21 C 13.43 833.49 10.23 817.47 7.66 796.48 C 5.09 775.49 3.19 770.66 1.91 723.25 C 0.63 675.83 0.00 582.42 0.00 512.00 C 0.00 441.58 0.63 348.17 1.91 300.75 C 3.19 253.34 5.09 248.51 7.66 227.52 C 10.23 206.53 13.43 190.51 17.32 174.79 C 21.22 159.08 25.76 145.79 31.04 133.22 C 36.32 120.65 42.26 109.65 49.02 99.38 C 55.79 89.11 63.23 80.01 71.62 71.62 C 80.01 63.23 89.11 55.79 99.38 49.02 C 109.65 42.26 120.65 36.32 133.22 31.04 C 145.79 25.76 159.08 21.22 174.79 17.32 C 190.51 13.43 206.53 10.23 227.52 7.66 C 248.51 5.09 253.34 3.19 300.75 1.91 C 348.17 0.63 441.58 0.00 512.00 0.00 C 582.42 0.00 675.83 0.63 723.25 1.91 C 770.66 3.19 775.49 5.09 796.48 7.66 C 817.47 10.23 833.49 13.43 849.21 17.32 C 864.92 21.22 878.21 25.76 890.78 31.04 C 903.35 36.32 914.35 42.26 924.62 49.02 C 934.89 55.79 943.99 63.23 952.38 71.62 C 960.77 80.01 968.21 89.11 974.98 99.38 C 981.74 109.65 987.68 120.65 992.96 133.22 C 998.24 145.79 1002.78 159.08 1006.68 174.79 C 1010.57 190.51 1013.77 206.53 1016.34 227.52 C 1018.91 248.51 1020.81 253.34 1022.09 300.75 C 1023.37 348.17 1024.00 441.58 1024.00 512.00 Z"/>
+    </clipPath>
+
+    <clipPath id="ic-windowClip">
+      <rect x="192" y="148" width="640" height="728" rx="176"/>
+    </clipPath>
+  
+    <style>
+      .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+      .sans { font-family: -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
+      .serif { font-family: ui-serif, "New York", "Iowan Old Style", Georgia, serif; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#paper)"/>
+  <rect width="1280" height="640" fill="url(#dots)"/>
+
+  <!-- lockup: the mark and the name -->
+  <svg x="80" y="88" width="88" height="88" viewBox="0 0 1024 1024">
+      <g clip-path="url(#ic-tileClip)">
+      <!-- tank plate -->
+      <rect width="1024" height="1024" fill="url(#ic-plate)"/>
+      <rect width="1024" height="1024" fill="url(#ic-lamp)"/>
+
+      <!-- the sight glass: empty headroom above the level -->
+      <rect x="192" y="148" width="640" height="728" rx="176" fill="url(#ic-glass)"/>
+
+      <!-- remaining quota behind the glass -->
+      <g clip-path="url(#ic-windowClip)">
+      <rect x="192" y="448" width="640" height="428" fill="url(#ic-liquid)"/>
+      <rect x="192" y="448" width="640" height="8" fill="#2A0D06" opacity="0.22"/>
+      <rect x="192" y="300" width="640" height="148" fill="url(#ic-sheen)"/>
+      <rect x="192" y="448" width="640" height="428" fill="url(#ic-plate)" opacity="0.10"/>
+      <rect x="192" y="148" width="640" height="728" rx="176" fill="none"
+      stroke="#F2EFE8" stroke-opacity="0.15" stroke-width="7"/>
+      </g>
+
+      <!-- the fill line: one bar, tangent to the liquid surface, overshooting both walls -->
+      <rect x="144" y="384" width="736" height="64" fill="url(#ic-fill)"/>
+
+      <!-- inner top highlight on the plate -->
+      <path d="M 1024.00 512.00 C 1024.00 582.42 1023.37 675.83 1022.09 723.25 C 1020.81 770.66 1018.91 775.49 1016.34 796.48 C 1013.77 817.47 1010.57 833.49 1006.68 849.21 C 1002.78 864.92 998.24 878.21 992.96 890.78 C 987.68 903.35 981.74 914.35 974.98 924.62 C 968.21 934.89 960.77 943.99 952.38 952.38 C 943.99 960.77 934.89 968.21 924.62 974.98 C 914.35 981.74 903.35 987.68 890.78 992.96 C 878.21 998.24 864.92 1002.78 849.21 1006.68 C 833.49 1010.57 817.47 1013.77 796.48 1016.34 C 775.49 1018.91 770.66 1020.81 723.25 1022.09 C 675.83 1023.37 582.42 1024.00 512.00 1024.00 C 441.58 1024.00 348.17 1023.37 300.75 1022.09 C 253.34 1020.81 248.51 1018.91 227.52 1016.34 C 206.53 1013.77 190.51 1010.57 174.79 1006.68 C 159.08 1002.78 145.79 998.24 133.22 992.96 C 120.65 987.68 109.65 981.74 99.38 974.98 C 89.11 968.21 80.01 960.77 71.62 952.38 C 63.23 943.99 55.79 934.89 49.02 924.62 C 42.26 914.35 36.32 903.35 31.04 890.78 C 25.76 878.21 21.22 864.92 17.32 849.21 C 13.43 833.49 10.23 817.47 7.66 796.48 C 5.09 775.49 3.19 770.66 1.91 723.25 C 0.63 675.83 0.00 582.42 0.00 512.00 C 0.00 441.58 0.63 348.17 1.91 300.75 C 3.19 253.34 5.09 248.51 7.66 227.52 C 10.23 206.53 13.43 190.51 17.32 174.79 C 21.22 159.08 25.76 145.79 31.04 133.22 C 36.32 120.65 42.26 109.65 49.02 99.38 C 55.79 89.11 63.23 80.01 71.62 71.62 C 80.01 63.23 89.11 55.79 99.38 49.02 C 109.65 42.26 120.65 36.32 133.22 31.04 C 145.79 25.76 159.08 21.22 174.79 17.32 C 190.51 13.43 206.53 10.23 227.52 7.66 C 248.51 5.09 253.34 3.19 300.75 1.91 C 348.17 0.63 441.58 0.00 512.00 0.00 C 582.42 0.00 675.83 0.63 723.25 1.91 C 770.66 3.19 775.49 5.09 796.48 7.66 C 817.47 10.23 833.49 13.43 849.21 17.32 C 864.92 21.22 878.21 25.76 890.78 31.04 C 903.35 36.32 914.35 42.26 924.62 49.02 C 934.89 55.79 943.99 63.23 952.38 71.62 C 960.77 80.01 968.21 89.11 974.98 99.38 C 981.74 109.65 987.68 120.65 992.96 133.22 C 998.24 145.79 1002.78 159.08 1006.68 174.79 C 1010.57 190.51 1013.77 206.53 1016.34 227.52 C 1018.91 248.51 1020.81 253.34 1022.09 300.75 C 1023.37 348.17 1024.00 441.58 1024.00 512.00 Z"
+      fill="none" stroke="url(#ic-rim)" stroke-width="8"/>
+      </g>
+  </svg>
+
+  <text class="serif" x="192" y="166" font-size="106" letter-spacing="-3.2" fill="#1A1915">Fillline</text>
+
+  <text class="mono" x="1200" y="118" font-size="14" letter-spacing="2.4" fill="#8D877C" text-anchor="end">MENU BAR · macOS 14+ · MIT</text>
+
+  <!-- the promise -->
+  <text class="sans" x="80" y="286" font-size="29" fill="#1A1915">See how much AI coding quota</text>
+  <text class="sans" x="80" y="330" font-size="29" fill="#5F5B53">you have left — before you hit the wall.</text>
+
+  <!-- right: one meter, the same row the popover draws -->
+  <g transform="translate(744, 268)">
+    <text class="mono" x="0" y="0" font-size="14" letter-spacing="2.4" fill="#8D877C">REMAINING</text>
+    <text class="sans" x="-3" y="118" font-size="104" font-weight="600" letter-spacing="-3.6" fill="#1A1915">62<tspan font-size="64">%</tspan></text>
+    <text class="mono" x="214" y="116" font-size="14" letter-spacing="1.6" fill="#5F5B53">5-HOUR</text>
+
+    <rect x="0" y="152" width="456" height="15" rx="7.5" fill="#1A1915" opacity="0.10"/>
+    <rect x="0" y="152" width="282.7" height="15" rx="7.5" fill="url(#fill)"/>
+    <rect x="67.4" y="145" width="2.5" height="29" fill="#1A1915" opacity="0.34"/>
+
+    <text class="mono" x="0" y="198" font-size="14" letter-spacing="1.4" fill="#5F5B53">resets in 3h 12m</text>
+    <text class="mono" x="456" y="198" font-size="14" letter-spacing="1.4" fill="#5F5B53" text-anchor="end">38% used</text>
+  </g>
+
+  <!-- footer -->
+  <rect x="80" y="512" width="1120" height="1" fill="#1A1915" opacity="0.12"/>
+  <text class="mono" x="80" y="556" font-size="14" letter-spacing="1.5" fill="#8D877C">CLAUDE CODE · OPENAI CODEX · OPENCODE GO · ANTIGRAVITY</text>
+  <text class="mono" x="1200" y="556" font-size="14" letter-spacing="1.5" fill="#8D877C" text-anchor="end">READ-ONLY · NO TELEMETRY</text>
+
+  <!-- the card's own fill line -->
+  <rect x="0" y="626" width="1280" height="14" fill="#A6432A"/>
+</svg>

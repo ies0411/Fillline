@@ -25,6 +25,11 @@ targets:
       # Sources/UsageApp is created in Phase 1 (SwiftUI @main, MenuBarExtra, popover).
       - path: Sources/UsageApp
         optional: true
+      # Icon comes from an asset catalog (Xcode only honours the icon via
+      # ASSETCATALOG_COMPILER_APPICON_NAME). Source of truth:
+      # docs/marketing/assets/app-icon-source.svg -> Resources/AppIcon.icns.
+      - path: Resources/Assets.xcassets
+        buildPhase: resources
     dependencies:
       - package: UsageCore
         product: UsageCore
@@ -45,6 +50,7 @@ targets:
         ENABLE_APP_SANDBOX: "NO"
         GENERATE_INFOPLIST_FILE: "YES"
         INFOPLIST_KEY_LSUIElement: "YES"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: Fillline
         INFOPLIST_KEY_NSHumanReadableCopyright: "MIT Licensed. Not affiliated with Anthropic, OpenAI, or OpenCode."
         COMBINE_HIDPI_IMAGES: "YES"
