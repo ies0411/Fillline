@@ -328,8 +328,23 @@
   ],
   "blockers": [
     {
+      "title": "Developer ID 인증서 없음",
+      "detail": "`security find-identity -v -p codesigning` → 0 valid identities. 서명·노타라이즈·DMG 배포(#5)가 여기서 막힘.",
+      "action": "Apple Developer Program 가입 후 Developer ID Application 인증서 발급"
+    },
+    {
+      "title": "Codex 실측 캡처 (사용자 로그인 필요)",
+      "detail": "app-server 프로토콜·미인증 응답까지는 실측 완료. 인증된 `primary_window`/`secondary_window`/`resetCredits` payload는 ChatGPT 로그인 없이 얻을 수 없음.",
+      "action": "`codex login` 후 1회 캡처 → fixture 고정 (#1)"
+    },
+    {
+      "title": "앱 화면 캡처 불가 (TCC)",
+      "detail": "`screencapture`가 `could not create image from display`로 실패. README 스크린샷(#6)과 실제 앱 시각 검증이 막혀 있고, 검증은 HTML 목업 + 사용자 눈으로 대체 중.",
+      "action": "시스템 설정에서 화면 기록 권한 허용 (선택)"
+    },
+    {
       "title": "모델 폴백 체인 없음",
-      "detail": "oh-my-opencode-slim의 `go` 프리셋은 에이전트마다 단일 모델. 429 한 번에 해당 레인이 죽고 재시도/대체가 없음.",
+      "detail": "oh-my-opencode-slim `go` 프리셋은 에이전트마다 단일 모델. 429 한 번에 레인이 죽음.",
       "action": "프리셋에 fallback 배열 추가 (oracle: glm→deepseek, designer/fixer: deepseek→glm)"
     }
   ],
