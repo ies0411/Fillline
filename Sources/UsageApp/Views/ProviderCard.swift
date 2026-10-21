@@ -279,6 +279,7 @@ private struct StatusFooter: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(Text(spokenMessage))
             }
 
             if let command {
@@ -307,7 +308,7 @@ private struct StatusFooter: View {
 
         switch snapshot.status {
         case .stale:
-            return "Stale · \(age) — showing last known values."
+            return "Stale · \(age)\(failureCountSuffix) — showing last known values."
         case .needsLogin:
             return "Sign-in required. Values are from \(age)."
         case .rateLimited(let retryAfter):
@@ -326,6 +327,34 @@ private struct StatusFooter: View {
         case .ok:
             return "Live."
         }
+    }
+
+    /// One failure is the ordinary case for a single bad poll, so it stays silent; two or
+    /// more mean the values are not just a minute old, they are stuck (issue #9).
+    private var failureCountSuffix: String {
+        let failures = snapshot.consecutiveFailures
+        guard failures >= 2 else { return "" }
+        return " · \(failures) failures"
+    }
+
+    /// Same information in words: VoiceOver reads the count as "after 3 failed refreshes"
+    /// rather than a bare number.
+    private var spokenMessage: String {
+        switch snapshot.status {
+        case .stale:
+            let failures = snapshot.consecutiveFailures
+            guard failures >= 2 else {
+                return "Stale for \(spokenAge), showing last known values."
+            }
+            return "Stale for \(spokenAge) after \(failures) failed refreshes, showing last known values."
+        default:
+            return message
+        }
+    }
+
+    /// `capturedAt` age in whole words, measured the same way `relativeAge` rounds it.
+    private var spokenAge: String {
+        UsageFormat.spokenDuration(max(0, now.timeIntervalSince(snapshot.capturedAt)))
     }
 
     private var command: String? {

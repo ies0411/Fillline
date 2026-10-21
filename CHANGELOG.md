@@ -9,6 +9,11 @@ broken parser ships as a patch release.
 
 ## [Unreleased]
 
+### Added
+- `UsageSnapshot.consecutiveFailures`: a stale card now says how many refreshes in a row
+  failed (`stale · 4m ago · 3 failures`), and VoiceOver reads the count in words. Old
+  caches decode with a count of 0; `0` always means the last attempt succeeded.
+
 ## [0.2.0-alpha.1] — 2026-10-21
 
 Second alpha. Focus: making the numbers **trustworthy** — where each value came from, how it

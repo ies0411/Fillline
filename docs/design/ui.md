@@ -122,7 +122,7 @@ value shown by the label, not the popover.
 | State | Trigger | Card | Menu bar |
 |---|---|---|---|
 | **ok** | fresh snapshot | rows; no footer | value, no prefix |
-| **stale** | `ok` older than `max(180, interval + 120)` s | rows + `STALE` badge + "Stale · 4m ago — showing last known values." | `~` prefix if ≤ 30 min old, otherwise omitted |
+| **stale** | `ok` older than `max(180, interval + 120)` s | rows + `STALE` badge + "Stale · 4m ago — showing last known values." After 2+ failed refreshes the age gains the count: "Stale · 4m ago · 3 failures — showing last known values." (one failure is silent — a single bad poll is ordinary) | `~` prefix if ≤ 30 min old, otherwise omitted |
 | **needs login** | 401, missing/expired credential | no rows: "Sign in to Claude Code", "Run the CLI once…", `claude` + copy; if last-good values exist: rows + footer + command | omitted |
 | **not installed** | CLI/credential directory absent | "Codex CLI not found. Install it and sign in once; this card fills in on its own." | omitted |
 | **not subscribed** | HTTP 403 (Go) | "This key has no Go plan." | omitted |
@@ -244,6 +244,8 @@ no pulsing badges, no looping decoration.
   2 hours 48 minutes, 2% used". Meters and decorative glyphs are hidden.
 - The menu bar label announces every visible value plus "low" where relevant.
 - Status badges carry the full phrase ("Sign-in required"), not just a dot.
+- The stale footer's count is spoken, not just drawn: "Stale for 4 minutes after 3 failed
+  refreshes, showing last known values."
 - Icon-only buttons have labels (refresh, settings, quit) and keep a focus ring
   (`.borderless` rather than `.plain`).
 - Colour is redundant everywhere: words for state, numbers for thresholds, `LOW` for

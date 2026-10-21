@@ -16,6 +16,10 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
     public let windows: [LimitWindow]
     public let source: Source
     public let status: ProviderStatus
+    /// Refresh attempts that failed in a row before this snapshot was published. `0` means
+    /// the last attempt succeeded, so retained values are not being carried by failures.
+    /// Purely a trust signal for the UI: it never changes a percentage (issue #9).
+    public let consecutiveFailures: Int
     public let capturedAt: Date
 
     public init(
@@ -25,6 +29,7 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
         windows: [LimitWindow],
         source: Source,
         status: ProviderStatus,
+        consecutiveFailures: Int = 0,
         capturedAt: Date
     ) {
         self.provider = provider
@@ -33,6 +38,7 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
         self.windows = windows
         self.source = source
         self.status = status
+        self.consecutiveFailures = max(0, consecutiveFailures)
         self.capturedAt = capturedAt
     }
 
@@ -58,7 +64,14 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
     public var hasValues: Bool { !windows.isEmpty }
 
     /// Same values with a new status, preserving `capturedAt` so the age stays honest.
-    public func replacing(status newStatus: ProviderStatus) -> UsageSnapshot {
+    ///
+    /// `consecutiveFailures` carries over unchanged so a stale snapshot keeps counting the
+    /// failures behind it; a success always reports `0` (issue #9). Pass `failures`
+    /// explicitly when the caller has just incremented the count.
+    public func replacing(
+        status newStatus: ProviderStatus,
+        consecutiveFailures failures: Int? = nil
+    ) -> UsageSnapshot {
         UsageSnapshot(
             provider: provider,
             plan: plan,
@@ -66,6 +79,7 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
             windows: windows,
             source: source,
             status: newStatus,
+            consecutiveFailures: failures ?? (newStatus.isSuccess ? 0 : consecutiveFailures),
             capturedAt: capturedAt
         )
     }
@@ -82,5 +96,35 @@ public struct UsageSnapshot: Codable, Sendable, Hashable, Identifiable {
         default:
             return self
         }
+    }
+
+    // MARK: - Codable
+
+    private enum CodingKeys: String, CodingKey {
+        case provider
+        case plan
+        case resetCredits
+        case windows
+        case source
+        case status
+        case consecutiveFailures
+        case capturedAt
+    }
+
+    /// Explicit decoding so a cache written before `consecutiveFailures` existed still loads,
+    /// reading the field as `0` instead of failing the whole entry.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.provider = try container.decode(ProviderID.self, forKey: .provider)
+        self.plan = try container.decodeIfPresent(String.self, forKey: .plan)
+        self.resetCredits = try container.decodeIfPresent(Int.self, forKey: .resetCredits)
+        self.windows = try container.decode([LimitWindow].self, forKey: .windows)
+        self.source = try container.decode(Source.self, forKey: .source)
+        self.status = try container.decode(ProviderStatus.self, forKey: .status)
+        self.consecutiveFailures = max(
+            0,
+            try container.decodeIfPresent(Int.self, forKey: .consecutiveFailures) ?? 0
+        )
+        self.capturedAt = try container.decode(Date.self, forKey: .capturedAt)
     }
 }

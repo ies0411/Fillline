@@ -16,7 +16,7 @@
       "v0.3.0 — distribution"
     ],
     "ci": "green (Swift 6.0 / 6.2)",
-    "issues_closed": 5,
+    "issues_closed": 6,
     "issues_open": 3
   },
   "stats": [
@@ -470,6 +470,10 @@
     {
       "date": "2026-10-21",
       "text": "CI 그린 (Swift 6.0 / 6.2), 테스트 109개 / 13 스위트"
+    },
+    {
+      "date": "2026-10-21",
+      "text": "stale 카드에 연속 실패 횟수 표시 — 값이 오래된 이유가 '한 번 실패'인지 '계속 실패'인지 구분. 테스트 116개"
     }
   ]
 }

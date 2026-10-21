@@ -148,14 +148,21 @@ public actor PollScheduler {
 
         if result.status.isSuccess {
             failures = 0
-            lastGood = result
+            lastGood = result.replacing(status: .ok, consecutiveFailures: 0)
         } else {
             failures += 1
-            if let lastGood {
+            if let good = lastGood {
                 // Keep the numbers, swap only the status. `capturedAt` stays old on purpose.
-                effective = lastGood.replacing(status: result.status)
+                effective = good.replacing(status: result.status, consecutiveFailures: failures)
             }
         }
+
+        // A snapshot with no last-good values still carries the count, so the card can say
+        // how many attempts in a row have failed (issue #9).
+        effective = effective.replacing(
+            status: effective.status,
+            consecutiveFailures: failures
+        )
 
         let delay = nextDelay(for: result.status, failures: failures, provider: result.provider)
         states[result.provider] = ProviderState(
