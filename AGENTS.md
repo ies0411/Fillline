@@ -250,19 +250,26 @@ docs/status/index.html # `./Scripts/status.sh --open`으로 생성되는 대시�
 - [x] Go 소스 확정 = OpenCode Go. Gemini CLI 제외 근거 정리 → `docs/providers/deferred.md`
 - [x] Keychain `Claude Code-credentials` 접근이 프롬프트 없이 동작 (기존 `security` 신뢰 항목 덕분).
       단, **ad-hoc 서명 빌드는 매번 재프롬프트** → 배포는 Developer ID 고정 서명 필수.
-- [ ] Codex CLI 설치 후 `wham/usage` 실측 1회 (Phase 1 초입)
+- [x] Codex CLI 설치 + `app-server` 핸드셰이크 실측 (`codex-cli 0.163.0`)
+- [ ] ChatGPT 인증 상태의 payload 캡처 (이슈 #1, 사용자 `codex login` 필요)
 
-**Phase 1 — MVP (3~5일)**
-- `UsageCore` 3-provider + 캐시 + 백오프 (스캐폴드 완료). `swift test` 그린 유지.
+**Phase 1 — MVP — ✅ 완료 (v0.1.0-alpha.1)**
+- `UsageCore` 4-provider + 캐시 + 백오프. `./Scripts/test-local.sh` 그린.
 - `MenuBarExtra` 라벨/팝오버, 수동 새로고침, 설정(주기, 표시 윈도우), `.notInstalled`/`.needsLogin` 카드.
-- Claude OAuth 읽기 토글(기본 off, 정책 고지 1스크린).
+- Claude OAuth 읽기 토글(기본 off, 정책 고지 1스크린). 앱 번들 빌드·실행 확인.
 
-**Phase 2 — 신뢰성/UX**
-- Codex app-server RPC 전략 추가(문서화된 경로 우선), 알림(80/95%), stale 표시 정교화,
-  첫 실행 온보딩, 스냅샷 히스토리 축적(스파크라인 데이터).
+**Phase 2 — 신뢰성/UX — ✅ 완료 (v0.2.0-alpha.1)**
+- [x] Codex app-server RPC 전략 + `Source.appServer` provenance 배지
+- [x] 알림 80%/95%/리셋 임박 (기본 off)
+- [x] `resetCredits` 전용 필드
+- [x] 스냅샷 히스토리 + 7일 스파크라인
+- [x] 인증 실패를 `.needsLogin`으로 분류(폴백 루프 종료)
+- [ ] stale 표시 정교화(연속 실패 횟수 노출 등) — 여전히 열림
 
-**Phase 3 — 배포**
-- Developer ID 서명/노타라이즈, DMG, Homebrew cask, README 스크린샷, GitHub Actions 릴리스.
+**Phase 3 — 배포 (v0.3.0)**
+- Developer ID 서명/노타라이즈(#5: 인증서 필요), DMG, Homebrew cask,
+  README 스크린샷(#6: TCC 때문에 자동 캡처 불가 → 사용자 캡처 또는 오프스크린 렌더),
+  GitHub Actions 릴리스 워크플로.
 
 **Phase 4 (선택)** — Antigravity provider, 비용 환산 뷰.
 
