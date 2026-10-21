@@ -9,14 +9,16 @@ broken parser ships as a patch release.
 
 ## [Unreleased]
 
+## [0.2.0-alpha.1] — 2026-10-21
+
+Second alpha. Focus: making the numbers **trustworthy** — where each value came from, how it
+has been moving, and telling you before a limit is hit.
+
 ### Added
-- Codex `app-server` strategy (`account/rateLimits/read`) preferred over the internal HTTP endpoint.
 - `Source.appServer`: snapshots now record which Codex strategy produced them, so the card can
-  badge the documented path instead of reporting `api` for everything.
+  badge the documented path (`APP SERVER`) instead of reporting `api` for everything.
 - `UsageSnapshot.resetCredits`: Codex reset-credit availability is a real field, shown as
   `N resets` on the card, instead of being appended to the plan string.
-- Antigravity provider that runs `agy -p /usage --output-format json` and parses its report
-  (opt-in, off by default, 300 s floor, no credential access).
 - Quota alerts: `NotificationPlanner` in `UsageCore` decides when a window reaches 80% or
   95% or is about to reset, and the app delivers them through `UNUserNotificationCenter`.
   Off by default; permission is requested only when the master toggle is switched on, and
@@ -29,6 +31,12 @@ broken parser ships as a patch release.
 - Seven-day sparkline on each provider card: remaining fraction for the card's longest-horizon
   window, fixed `0…1` domain, no axes or legend, hidden until two samples exist. The trail is
   spoken to VoiceOver as a trend sentence rather than hidden as decoration.
+
+### Fixed
+- An unauthenticated `codex app-server` reported `app-server-rpc-32600` and then fell through to
+  the HTTP strategy, which fails the same way later. An "authentication required" RPC error is
+  now classified as `needs login` and ends the strategy loop. The error text is never stored or
+  logged — only a single classified bit travels with the error.
 
 ## [0.1.0-alpha.1] — 2026-10-21
 
