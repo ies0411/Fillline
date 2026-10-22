@@ -1,12 +1,28 @@
 # Fillline
 
 A macOS 14+ menu-bar app that shows how much of your AI coding quota is **left** — for
-Claude Code, OpenAI Codex, and OpenCode Go — and when each limit resets. It reads the
-credentials your CLIs already stored, calls the same usage sources those CLIs use, and
-renders remaining percentages. No login flow, no token refresh, no telemetry, and no
-third-party dependencies.
+Claude Code, OpenAI Codex, OpenCode Go, Antigravity, GitHub Copilot and OpenRouter — and when
+each limit resets. It reads the credentials your CLIs already stored, calls the same usage
+sources those CLIs use, and renders remaining percentages. No login flow, no token refresh, no
+telemetry, and no third-party dependencies.
 
-> Screenshot: pending
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/marketing/assets/app-popover-healthy-dark.png">
+    <img src="docs/marketing/assets/app-popover-healthy-light.png" width="340" alt="Fillline popover in the healthy state: four provider cards with remaining percentages, reset countdowns and a seven-day sparkline each">
+  </picture>
+</p>
+
+These are rendered from the shipping SwiftUI views (`./Scripts/screenshots.sh`, `ImageRenderer`), not
+mockups — same layout, same numbers formatting. The second pair shows what failure looks like, which
+is the part most quota apps get wrong:
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/marketing/assets/app-popover-degraded-dark.png">
+    <img src="docs/marketing/assets/app-popover-degraded-light.png" width="340" alt="Fillline popover in a degraded state: one provider stale with a failure count, one needing login, one not installed, the rest still showing values">
+  </picture>
+</p>
 
 ## Features
 

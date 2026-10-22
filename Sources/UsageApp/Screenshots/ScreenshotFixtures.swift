@@ -229,6 +229,181 @@ enum ScreenshotFixtures {
         )
     }
 
+    /// The ceiling shot (issue #15): every provider at once, all answering. Six healthy cards
+    /// are ~+250 pt taller than the four `healthy()` draws, so the stack crosses
+    /// `PopoverView.cardStackCeiling` (708 pt) and the render shows the scroll edge — the whole
+    /// point of the panel.
+    ///
+    /// It also draws the two window shapes the four-provider panels never do: Copilot's
+    /// `.monthly` buckets and OpenRouter's text-only `$` credits row (`UsageFormat.isAmountRow`
+    /// keeps it out of the meter, the menu bar number and the sparkline).
+    static func crowded() -> Panel {
+        let now = Date()
+        let capturedAt = now.addingTimeInterval(-32)
+
+        let claude = snapshot(
+            .claudeCode,
+            plan: "Max",
+            windows: [
+                window(
+                    .claudeCode, kind: .session5h, label: "5-hour", used: 0.19,
+                    resetsIn: hours(3) + minutes(41), now: now, capturedAt: capturedAt
+                ),
+                window(
+                    .claudeCode, kind: .weekly7d, label: "Weekly", used: 0.62,
+                    resetsIn: days(2) + hours(19), now: now, capturedAt: capturedAt
+                ),
+            ],
+            source: .api,
+            status: .ok,
+            capturedAt: capturedAt
+        )
+
+        let codex = snapshot(
+            .codex,
+            plan: "Plus",
+            resetCredits: 1,
+            windows: [
+                window(
+                    .codex, kind: .session5h, label: "Session (5h)", used: 0.45,
+                    resetsIn: hours(2) + minutes(48), now: now, capturedAt: capturedAt
+                ),
+                window(
+                    .codex, kind: .weekly7d, label: "Weekly", used: 0.69,
+                    resetsIn: days(4) + hours(6), now: now, capturedAt: capturedAt
+                ),
+            ],
+            source: .appServer,
+            status: .ok,
+            capturedAt: capturedAt
+        )
+
+        let go = snapshot(
+            .openCodeGo,
+            plan: "Go",
+            windows: [
+                window(
+                    .openCodeGo, kind: .rolling, label: "Rolling", used: 0.08,
+                    resetsIn: hours(1) + minutes(12), now: now, capturedAt: capturedAt
+                ),
+                window(
+                    .openCodeGo, kind: .weekly7d, label: "Weekly", used: 0.41,
+                    resetsIn: days(3) + hours(9), now: now, capturedAt: capturedAt
+                ),
+                window(
+                    .openCodeGo, kind: .monthly, label: "Monthly", used: 0.26,
+                    resetsIn: days(18), now: now, capturedAt: capturedAt
+                ),
+            ],
+            source: .api,
+            status: .ok,
+            capturedAt: capturedAt
+        )
+
+        let antigravity = snapshot(
+            .antigravity,
+            plan: "AI Pro",
+            windows: [
+                window(
+                    .antigravity, kind: .session5h, label: "Gemini · 5h", used: 0.22,
+                    resetsIn: hours(4) + minutes(20), now: now, capturedAt: capturedAt
+                ),
+                window(
+                    .antigravity, kind: .weekly7d, label: "Gemini · Weekly", used: 0.35,
+                    resetsIn: days(5) + hours(2), now: now, capturedAt: capturedAt
+                ),
+            ],
+            source: .api,
+            status: .ok,
+            capturedAt: capturedAt
+        )
+
+        // Copilot's buckets are all `.monthly`; `unlimited` and zero-entitlement buckets are
+        // dropped by the provider, so a card here means a real fraction came back.
+        let copilot = snapshot(
+            .githubCopilot,
+            plan: "Individual",
+            windows: [
+                window(
+                    .githubCopilot, kind: .monthly, label: "Premium", used: 0.34,
+                    resetsIn: days(11) + hours(5), now: now, capturedAt: capturedAt
+                ),
+                window(
+                    .githubCopilot, kind: .monthly, label: "Chat", used: 0.58,
+                    resetsIn: days(11) + hours(5), now: now, capturedAt: capturedAt
+                ),
+            ],
+            source: .api,
+            status: .ok,
+            capturedAt: capturedAt
+        )
+
+        // A credits row, not a quota: the label carries the amount and there is no reset,
+        // because "no cap" means there is no limit to reset.
+        let openRouter = snapshot(
+            .openRouter,
+            plan: nil,
+            windows: [
+                LimitWindow(
+                    id: "\(ProviderID.openRouter.rawValue).credits",
+                    kind: .credits,
+                    label: "$8.50 left · no cap",
+                    usedFraction: 0,
+                    resetsAt: nil,
+                    isEstimated: false,
+                    isPlaceholder: false,
+                    capturedAt: capturedAt
+                )
+            ],
+            source: .api,
+            status: .ok,
+            capturedAt: capturedAt
+        )
+
+        return Panel(
+            snapshots: [
+                .claudeCode: claude,
+                .codex: codex,
+                .openCodeGo: go,
+                .antigravity: antigravity,
+                .githubCopilot: copilot,
+                .openRouter: openRouter,
+            ],
+            sparklines: [
+                .claudeCode: trail(
+                    .claudeCode, windowLabel: "Weekly", kind: .weekly7d, endingUsed: 0.62,
+                    now: now, drop: 0.18
+                ),
+                .codex: trail(
+                    .codex, windowLabel: "Weekly", kind: .weekly7d, endingUsed: 0.69,
+                    now: now, drop: 0.12
+                ),
+                .openCodeGo: trail(
+                    .openCodeGo, windowLabel: "Weekly", kind: .weekly7d, endingUsed: 0.41,
+                    now: now, drop: 0.26
+                ),
+                .antigravity: trail(
+                    .antigravity, windowLabel: "Gemini · Weekly", kind: .weekly7d,
+                    endingUsed: 0.35, now: now, drop: 0.15
+                ),
+                .githubCopilot: trail(
+                    .githubCopilot, windowLabel: "Premium", kind: .monthly,
+                    endingUsed: 0.34, now: now, drop: 0.22
+                ),
+                // No trail for OpenRouter: a `$` row has no fraction to plot, and the card
+                // correctly draws no line rather than a flat one at zero.
+            ],
+            lastAttemptAt: [
+                .claudeCode: capturedAt,
+                .codex: capturedAt,
+                .openCodeGo: capturedAt,
+                .antigravity: capturedAt,
+                .githubCopilot: capturedAt,
+                .openRouter: capturedAt,
+            ]
+        )
+    }
+
     // MARK: - Builders
 
     private static func snapshot(

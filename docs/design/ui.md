@@ -15,13 +15,13 @@ come back?"** Every layout decision below serves that sentence:
 - a missing value is missing, never `0%`.
 
 The app lives in the menu bar, so the popover is a **glance**, not a dashboard. One screen,
-no tabs, no charts, no scrolling by default.
+no tabs, no charts, and no scrolling until the cards outgrow one screen (§2).
 
 **Visual thesis:** a quiet instrument. Monochrome until something is actually wrong, then
 one signal colour. System type, hairline structure, tabular numbers, nothing decorative
 that is not also information.
 
-## 2. Layout (340 × ~510–790 pt, content-sized)
+## 2. Layout (340 × ~510–772 pt, content-sized up to a 708 pt card ceiling)
 
 ```
 ┌──────────────────────────────────────────────┐ 340
@@ -46,15 +46,55 @@ that is not also information.
 
 - Width is fixed at **340 pt** so the popover does not resize when a plan badge or a
   status word changes.
-- Height is content-sized. Measured in the mock: a healthy **four-provider** popover is
-  ~646 pt, the tallest state (one stale card, which adds a footer line) ~678 pt, first run
-  ~510 pt. All of it still fits a 900 pt display, so v1 keeps no `ScrollView` — four
-  providers with at most three windows each is the ceiling the layout is designed for.
-  Antigravity is opt-in: a stock install is one card shorter than the diagram.
-  These measurements **predate the sparkline** (§12): it adds ~29 pt per card, so the healthy
-  four-provider state is now ~754 pt and the tallest ~786 pt, still inside the ceiling.
+- Height is content-sized **up to a ceiling**. Measured from the shipping renders at 2×: a
+  healthy **four-provider** popover is 738 pt (card stack 674 pt), the tallest four-provider
+  state (one stale card, which adds a footer line) is 682 pt, first run ~510 pt. All of it sits
+  under the ceiling, so a four-provider popover does not scroll and no scroll indicator ever
+  appears. Antigravity is opt-in: a stock install is one card shorter than the diagram.
+  The older, sparkline-free mock measured 646 pt for the same four cards; §12 added ~29 pt
+  per card, so the numbers above are the ones to use.
+- **Five providers or more scroll.** The card stack is the only part of the popover that
+  grows with the provider count, so it is the only part that is a `ScrollView`; the header,
+  both dividers and the footer are fixed chrome outside it. The stack is capped at
+  `PopoverView.cardStackCeiling` = **708 pt**, which is what keeps the popover on a 900 pt
+  display: six cards measure 922 pt of stack inside a 708 pt window, so the popover renders
+  at **772 pt** instead of 986 pt, and the last cards are reached by scrolling (issue #15).
+  Five cards are 847 pt of stack — already over the ceiling, so the same 772 pt popover with
+  139 pt of travel; six have 214 pt. Measured for the four-, five- and six-provider cases with
+  the shipping view hierarchy in a hosted `NSWindow`: `NSScrollView` content 674 / 847 / 922 pt
+  against the 708 pt cap, and 0 pt of travel for the four-provider case.
+  - **Why 708 and not 720.** The ceiling is a leftover-avoidance number, so it can move a
+    little to land the cut somewhere sensible. At 720 the six-provider cut landed 9 pt *into*
+    the fifth card's `65%` numeral — the tops of the digits stayed legible through the fade;
+    at 708 it lands in the 14 pt of empty card between that card's title and its first
+    numeral, so the visible top of the cut card contains no numerals at all. The shift is
+    12 pt, inside the 16 pt the fade review allowed.
+- The scroll indicator is an **overlay**, and the stack is pinned to the popover width
+  rather than left flexible, so the indicator can never take width away from a card: it draws
+  over the 12 pt gutter the cards already leave free. Pinning is what makes that true even if
+  someone turns on legacy (space-taking) scroll bars in System Settings.
+- **Edge fades are conditional.** The bottom edge fades **10 pt** while the stack fits — that
+  value sits inside the list's own 10 pt bottom padding, so a fitted stack fades empty space
+  and is pixel-for-pixel what it was before the scroll view existed (the four-provider renders
+  are byte-identical). It grows to **28 pt** once the stack is taller than the ceiling: a
+  20 pt headline numeral is ~15 pt tall, so a 10 pt fade would leave the top of a clipped
+  numeral at ~80 % opacity — a sliced glyph, which reads as broken rather than as "more
+  below"; at 28 pt the same numeral enters the fade at ~30 % and reaches zero before the clip.
+  The overflow case also adds **18 pt** of bottom padding (the difference between the two
+  fades), so scrolling to the end still leaves the last card outside the fade. The top edge
+  stays at 10 pt: at rest the list starts 12 pt in, so nothing is under it, and a taller top
+  fade would dim the first card's own top edge.
+  - Fitted vs cut is **measured**, not inferred from the provider count: a preference carries
+    the laid-out list height up to the popover, which compares it with the ceiling. Cards
+    change height with state (a stale footer, a sign-in body), so "five providers" is not the
+    same thing as "past the ceiling". The same measurement runs in the offscreen render path.
 - Cards are 11 pt-radius panels with a 4.5% primary tint and a 1 pt hairline. No nested
   materials: the popover's own vibrancy is the background.
+- The six-provider case is rendered for the docs as
+  `docs/marketing/assets/app-popover-crowded-{light,dark}.png` (Claude Code, Codex, Go,
+  Antigravity, Copilot, OpenRouter): four cards, then the fifth card's title dissolving at
+  the 708 pt edge — the picture of "there is more, and it scrolls" rather than of a popover
+  running off the display.
 
 ## 3. Remaining-first rules
 
@@ -384,6 +424,22 @@ competing with the meter bar.
   line on a non-Retina display, and whether the 10% area fill still reads against the
   popover's vibrancy rather than the solid background used for the offscreen check (§12.7).
 - App bundle build, signing, and the Keychain prompt path (requires Xcode).
+- The card stack's `ScrollView` and its edge fades (§2): the layout was measured in a hosted
+  `NSWindow` — stack content 674 / 847 / 922 pt for four / five / six providers against the
+  708 pt cap, 0 pt of travel for four and 139 / 214 pt for five and six — and scrolled to the
+  end, where the last card lands inside the clip with its bottom edge still at full strength
+  (the taller fade is measured to cover empty padding only). The fitted case is pixel-identical
+  to the pre-scroll renders; the crowded render differs from them only inside the 28 pt fade
+  band. What still needs a real popover is the *feel*: overlay indicator timing, wheel and
+  trackpad inertia, and whether the fade reads on the popover material the way it does on the
+  solid surface of a render. `ImageRenderer` cannot draw a `ScrollView` at all
+  (AppKit-composited, like the `.borderless` button style §11 avoids), so the documentation
+  renders swap it for a clipping container of the same size via `\.cardStackScrolls`; the
+  renders show the ceiling, not the gesture.
+- The one cut the conditional fade does not fix is the **top** edge while scrolling: it stays
+  at 10 pt, so a card scrolled under it can still show the top of a numeral. Growing it would
+  dim the first card at rest (the list only starts 12 pt in), so it is left alone until the
+  app can tell "scrolled to the very top" from "at rest".
 
 The HTML mock is the visual contract for the four-provider layout; any change to that layout
 should be reflected there first. The sparkline (§12) is the one documented exception: the mock

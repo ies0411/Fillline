@@ -47,6 +47,12 @@ enum ScreenshotRenderer {
         let states: [(name: String, model: AppModel)] = [
             ("healthy", AppModel(documentation: ScreenshotFixtures.healthy())),
             ("degraded", AppModel(documentation: ScreenshotFixtures.degraded())),
+            // Six providers: the stack is taller than `PopoverView.cardStackCeiling`, so the
+            // render is clamped and the bottom fade switches to its overflow height (#15).
+            // This is also the render the fade review checked: nothing in the fifth card is
+            // sliced, because the cut was measured to land in the band between its title and
+            // its first numeral.
+            ("crowded", AppModel(documentation: ScreenshotFixtures.crowded())),
         ]
 
         for state in states {
@@ -73,17 +79,20 @@ enum ScreenshotRenderer {
         let content = PopoverView()
             .environment(model)
             .environment(\.colorScheme, scheme)
-            .frame(width: 340)
+            .environment(\.cardStackScrolls, false)
+            .frame(width: PopoverView.popoverWidth)
             .background(surface(for: scheme))
 
-        // Known limitation (macOS 26): `ImageRenderer` draws its "unsupported content"
-        // placeholder for views composited by AppKit, which is what `.buttonStyle(.borderless)`
-        // and `.link` are. The popover's controls therefore use `GhostButtonStyle` and
-        // `LinkButtonStyle` (`Views/PopoverButtonStyles.swift`), which draw with SwiftUI only,
-        // so every pixel in these PNGs — including the buttons — comes from the shipping views.
+        // Known limitations (macOS 26): `ImageRenderer` draws its "unsupported content"
+        // placeholder — or nothing at all — for views composited by AppKit, which is what
+        // `.buttonStyle(.borderless)`, `.link` and `ScrollView` are. The popover's controls
+        // therefore use `GhostButtonStyle` and `LinkButtonStyle`
+        // (`Views/PopoverButtonStyles.swift`), and `\.cardStackScrolls` swaps the scroll view
+        // for a clipping container of the same size, so every pixel in these PNGs — including
+        // the buttons and the crowded stack — comes from the shipping views.
         let renderer = ImageRenderer(content: content)
         renderer.scale = 2
-        renderer.proposedSize = ProposedViewSize(width: 340, height: nil)
+        renderer.proposedSize = ProposedViewSize(width: PopoverView.popoverWidth, height: nil)
 
         guard let image = renderer.nsImage,
             let tiff = image.tiffRepresentation,

@@ -9,6 +9,11 @@ broken parser ships as a patch release.
 
 ## [Unreleased]
 
+## [0.4.0-alpha.1] — 2026-10-22
+
+Fourth alpha. Two more providers, and the first release whose screenshots are rendered from the
+shipping views rather than drawn by hand.
+
 ### Added
 - **GitHub Copilot** provider (opt-in). Reads `GET https://api.github.com/copilot_internal/user`
   with a token obtained from `gh auth token` — no credential is copied, stored, or refreshed.
@@ -22,8 +27,20 @@ broken parser ships as a patch release.
   Account balance needs a management key, so only per-key budget is read.
 
 ### Fixed
+- With five or more providers enabled the popover grew past the bottom of the screen and the
+  lower cards were unreachable. The card stack now scrolls inside a fixed ceiling (708 pt) while
+  the header and footer stay put; a stack that fits is pixel-identical to before and has no
+  scrollable range. The bottom edge fades so the cut reads as "more below" instead of slicing a
+  numeral in half.
 - Amount-only windows (OpenRouter) no longer render as an empty meter, and are excluded from the
   menu-bar percentage, the "lowest" summary, and sparklines.
+
+### Changed
+- README screenshots are now rendered offscreen from the shipping SwiftUI views by
+  `./Scripts/screenshots.sh` (healthy, degraded, and a six-provider crowded state; light + dark),
+  so the documented UI cannot drift from the real one. Rendering that way exposed two
+  AppKit-backed button styles that could not be rasterised; they were replaced with app-owned
+  SwiftUI styles (`GhostButtonStyle`, `LinkButtonStyle`) with no visual change.
 
 ## [0.2.1-alpha.1] — 2026-10-21
 

@@ -75,7 +75,7 @@ Claude Code · OpenAI Codex · OpenCode Go · Antigravity를 위한 macOS 메뉴
 > Architecture note: a testable `UsageCore` library (no AppKit) with per-provider ordered
 > strategies (`app-server` → internal HTTP → local logs → cache), an actor `PollScheduler` with
 > 60 s floor (180 s for Claude, which rate-limits aggressively), and `SnapshotHistory` for the
-> sparkline. Tests are fixture-driven; 116 of them. You can build the core with Command Line
+> sparkline. Tests are fixture-driven; 138 of them. You can build the core with Command Line
 > Tools alone (`swift build`), the app needs Xcode.
 
 ## 4. Reddit

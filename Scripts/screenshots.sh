@@ -40,8 +40,8 @@ if [ ! -e "${PNGS[0]}" ]; then
     echo "error: no app-popover-*.png was produced." >&2
     exit 1
 fi
-if [ "${#PNGS[@]}" -ne 4 ]; then
-    echo "error: expected 4 screenshots, found ${#PNGS[@]}." >&2
+if [ "${#PNGS[@]}" -lt 6 ]; then
+    echo "error: expected 6 screenshots (healthy + degraded + crowded, light + dark), found ${#PNGS[@]}." >&2
     exit 1
 fi
 
