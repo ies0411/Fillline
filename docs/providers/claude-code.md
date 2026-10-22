@@ -83,6 +83,21 @@ Traps observed:
 | 403 | plan does not expose usage | `.unsupported` |
 | 5xx / timeout | transient | `.stale(age)` after backoff |
 
+## 두 경로의 트레이드오프 (2026-10-22 결정)
+
+| | A. OAuth usage 엔드포인트 (현재) | B. `statusLine` 훅 (이슈 #10) |
+|---|---|---|
+| 문서화 | ❌ 비공식, UA 위장 필요 | ✅ 공식 설정 옵션 |
+| 토큰 열람 | ⚠️ Keychain에서 읽음 | ✅ 읽지 않음 |
+| 정책 리스크 | Anthropic 자격증명 정책과 충돌 소지 | 낮음 (사용자가 자기 설정에 명령 등록) |
+| 최신성 | 앱이 원할 때 폴링 (180s) | Claude Code가 화면을 그릴 때만 갱신 |
+| 설치 마찰 | 토글 1개 | `~/.claude/settings.json` 수정 동의 필요 |
+| 앱 미사용 시 | 계속 갱신 | 값이 멈춤 → `.stale` 표시 |
+
+**결정:** A를 유지하되 **"Advanced · Claude Code"로 강등**하고 기본 off (v0.3.0에서 UI 반영 완료).
+B는 #10으로 구현하되, 켜져 있으면 A를 자동으로 끈다(둘 중 하나만). 둘 다 기본값이 아니다 —
+기본 상태의 Claude 카드는 로컬 로그 집계(`estimated`)만 보여준다.
+
 ## Legal
 
 Anthropic's Claude Code docs (*Authentication and credential use*) state that OAuth tokens are for
