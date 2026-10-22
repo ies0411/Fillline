@@ -228,6 +228,40 @@ final class AppModel {
         rebuildScheduler()
     }
 
+    /// Documentation-render seam (issue #6), used only by `ScreenshotRenderer`.
+    ///
+    /// The screenshots must be of the real views, so the renderer needs a model that already
+    /// holds believable data. Every value here is assigned during initialization, which means
+    /// no `didSet` observer runs: nothing is written to `UserDefaults` (the onboarding flag and
+    /// the settings stay untouched), no scheduler is built, and the polling loop never starts —
+    /// so no Keychain read, no network request and no `agy` subprocess.
+    init(documentation panel: ScreenshotFixtures.Panel) {
+        self.defaults = .standard
+        self.cache = SnapshotCache()
+        self.history = SnapshotHistory()
+        self.notifier = SilentNotificationDelivering()
+        self.notificationKeys = NotificationKeyStore(defaults: .standard)
+        self.scheduler = PollScheduler(providers: [], configuration: .init())
+
+        // All four cards, with Claude's OAuth read on: the dashboard only draws a Claude window
+        // when that consent flag is set, and Antigravity is off by default.
+        self.claudeOAuthReadEnabled = true
+        self.notificationsEnabled = false
+        self.pollInterval = .balanced
+        self.menuBarStyle = .all
+        self.menuBarNumber = .primary
+        self.hasCompletedOnboarding = true
+        self.enabledProviders = Set(ProviderID.allCases)
+
+        self.snapshots = panel.snapshots
+        self.sparklines = panel.sparklines
+        self.lastAttemptAt = panel.lastAttemptAt
+
+        // `start()` is idempotent on `loopTask`; this finished task is the guard that keeps a
+        // render from ever reaching the network, the Keychain or the snapshot cache.
+        self.loopTask = Task {}
+    }
+
     // MARK: Derived state
 
     var orderedProviders: [ProviderID] {

@@ -154,7 +154,7 @@ struct ProviderCard: View {
                     Text("Turn on in Settings")
                         .font(.system(size: 10.5, weight: .medium))
                 }
-                .buttonStyle(.link)
+                .buttonStyle(LinkButtonStyle())
                 .padding(.top, 1)
             }
         }
@@ -387,7 +387,7 @@ private struct CommandPill: View {
                 Image(systemName: didCopy ? "checkmark" : "doc.on.doc")
                     .font(.system(size: 9, weight: .semibold))
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(GhostButtonStyle())
             .foregroundStyle(.secondary)
             .accessibilityLabel(Text(didCopy ? "Copied" : "Copy command"))
         }

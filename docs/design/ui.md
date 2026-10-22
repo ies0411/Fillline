@@ -247,7 +247,9 @@ no pulsing badges, no looping decoration.
 - The stale footer's count is spoken, not just drawn: "Stale for 4 minutes after 3 failed
   refreshes, showing last known values."
 - Icon-only buttons have labels (refresh, settings, quit) and keep a focus ring
-  (`.borderless` rather than `.plain`).
+  (`GhostButtonStyle`, an app-owned style rather than `.borderless`: AppKit-composited
+  styles are not rasterisable by `ImageRenderer`, so screenshots come out as
+  placeholder art).
 - Colour is redundant everywhere: words for state, numbers for thresholds, `LOW` for
   critical. Amber/red are restricted to non-text graphics.
 - Body text uses `.secondary` on the popover material; tertiary is reserved for separators

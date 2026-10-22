@@ -76,7 +76,7 @@ struct PopoverView: View {
                 .frame(width: 18, height: 18)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(GhostButtonStyle())
             .disabled(model.isRefreshing)
             .help("Refresh now")
             .accessibilityLabel(Text(model.isRefreshing ? "Refreshing usage" : "Refresh usage"))
@@ -87,7 +87,7 @@ struct PopoverView: View {
                     .frame(width: 18, height: 18)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(GhostButtonStyle())
             .help("Settings")
             .accessibilityLabel("Open settings")
         }
@@ -146,7 +146,7 @@ struct PopoverView: View {
                 Text("Open Settings")
                     .font(.system(size: 10.5, weight: .medium))
             }
-            .buttonStyle(.link)
+            .buttonStyle(LinkButtonStyle())
             .padding(.top, 1)
         }
         .frame(maxWidth: .infinity)
@@ -167,7 +167,7 @@ struct PopoverView: View {
             Button("Quit") {
                 NSApplication.shared.terminate(nil)
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(GhostButtonStyle())
             .font(.system(size: 9.5))
             .accessibilityLabel("Quit Fillline")
         }
@@ -241,7 +241,7 @@ private struct OnboardingView: View {
                 Button("Quit") {
                     NSApplication.shared.terminate(nil)
                 }
-                .buttonStyle(.borderless)
+                .buttonStyle(GhostButtonStyle())
                 .font(.system(size: 9.5))
                 .accessibilityLabel("Quit Fillline")
             }
@@ -272,7 +272,7 @@ private struct OnboardingView: View {
                     .frame(width: 18, height: 18)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(GhostButtonStyle())
             .help("Settings")
             .accessibilityLabel("Open settings")
         }
