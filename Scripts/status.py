@@ -32,6 +32,7 @@ EMPTY = '<span class="text-faint">데이터 없음</span>'
 
 TABS = [
     ("overview", "개요"),
+    ("usage", "사용법"),
     ("providers", "Providers"),
     ("architecture", "아키텍처"),
     ("security", "보안 · 법적"),
@@ -270,6 +271,12 @@ code {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 500;
+}
+
+/* Inline code inside the usage table must not break mid-token
+   ("Claude Code-credentials" was wrapping after the hyphen). */
+.usage-table code {
+  white-space: nowrap;
 }
 
 .focus-ring:focus-visible {
@@ -804,7 +811,133 @@ def render_overview(data, facts, number, hidden):
 
 
 # --------------------------------------------------------------------------
-# Tab 02 — providers
+# Tab 02 — usage (how to actually run and read the app)
+# --------------------------------------------------------------------------
+
+def render_usage(data, facts, number, hidden):
+    usage = as_dict(data.get("usage"))
+    intro = field(usage, "intro")
+    quickstart = [as_dict(s) for s in as_list(usage.get("quickstart"))]
+    enable = [as_dict(s) for s in as_list(usage.get("enable"))]
+    reading = [as_dict(s) for s in as_list(usage.get("reading"))]
+    trouble = [as_dict(s) for s in as_list(usage.get("troubleshooting"))]
+
+    body = []
+    if intro:
+        body.append(
+            '<p class="max-w-3xl text-pretty text-[15px] leading-[1.75] text-ink/85 sm:text-[16px]">'
+            f"{inline(intro)}</p>"
+        )
+
+    # --- quickstart steps ------------------------------------------------
+    steps = []
+    for index, step in enumerate(quickstart, 1):
+        code = field(step, "code")
+        detail = field(step, "detail")
+        code_html = (
+            '<pre class="mt-2.5 overflow-x-auto rounded-lg bg-ink/[0.055] px-3 py-2 '
+            'font-mono text-[11px] leading-relaxed text-ink/80"><code>'
+            f"{esc(code)}</code></pre>"
+            if code
+            else ""
+        )
+        steps.append(
+            '<li class="flex gap-3.5">'
+            f'<span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full '
+            f'border border-ink/15 bg-surface-2 font-mono text-[11px] tabular-nums text-muted">{index}</span>'
+            '<div class="min-w-0 flex-1">'
+            f'<p class="text-[13.5px] font-medium leading-relaxed">{inline(field(step, "title"))}</p>'
+            + (
+                f'<p class="mt-1 text-[12.5px] leading-relaxed text-muted">{inline(detail)}</p>'
+                if detail
+                else ""
+            )
+            + code_html
+            + "</div></li>"
+        )
+    if steps:
+        body.append(
+            '<div class="mt-7 rounded-xl border border-ink/10 bg-surface/70 p-4 sm:p-5">'
+            f'{label("설치와 첫 실행")}'
+            '<ol class="mt-3.5 space-y-4">' + "".join(steps) + "</ol>"
+            "</div>"
+        )
+
+    # --- provider enablement table ---------------------------------------
+    if enable:
+        rows = []
+        for item in enable:
+            default = field(item, "default") or "—"
+            tone = "emerald" if default == "켜짐" else "faint"
+            rows.append(
+                '<tr class="align-top transition-colors hover:bg-ink/[0.025]">'
+                f'<th scope="row" class="px-4 py-3 text-left text-[12.5px] font-medium">{inline(field(item, "provider"))}</th>'
+                f'<td class="whitespace-nowrap px-4 py-3">{label(default, tone)}</td>'
+                f'<td class="px-4 py-3 text-[12px] leading-relaxed text-muted">{inline(field(item, "how"))}</td>'
+                f'<td class="px-4 py-3 text-[12px] leading-relaxed text-faint">{inline(field(item, "needs"))}</td>'
+                "</tr>"
+            )
+        body.append(
+            '<div class="mt-7">'
+            f"{label('provider 켜기 — 설정은 앱 우클릭 메뉴 또는 팝오버 하단 설정에서')}"
+            '<div class="mt-2.5 overflow-x-auto rounded-xl border border-ink/10 bg-surface/70">'
+            '<table class="usage-table w-full min-w-[760px] border-collapse text-left">'
+            '<thead><tr class="border-b border-ink/10">'
+            f'<th class="px-4 py-2.5">{label("Provider")}</th>'
+            f'<th class="px-4 py-2.5">{label("기본값")}</th>'
+            f'<th class="px-4 py-2.5">{label("켜는 법")}</th>'
+            f'<th class="px-4 py-2.5">{label("필요한 것")}</th>'
+            "</tr></thead><tbody>"
+            + "".join(rows)
+            + "</tbody></table></div></div>"
+        )
+
+    # --- how to read it ---------------------------------------------------
+    if reading:
+        chips = []
+        for item in reading:
+            chips.append(
+                '<div class="rounded-lg border border-ink/10 bg-surface-2/60 px-3 py-2.5">'
+                f'<p class="font-mono text-[12px] leading-none text-ink/90">{esc(field(item, "label"))}</p>'
+                f'<p class="mt-2 text-[11.5px] leading-relaxed text-muted">{inline(field(item, "meaning"))}</p>'
+                "</div>"
+            )
+        body.append(
+            '<div class="mt-7">'
+            f"{label('메뉴바 읽는 법 — 남은 %가 먼저, 사용 %는 보조')}"
+            '<div class="mt-2.5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">'
+            + "".join(chips)
+            + "</div></div>"
+        )
+
+    # --- troubleshooting --------------------------------------------------
+    if trouble:
+        items = []
+        for item in trouble:
+            items.append(
+                '<li class="flex gap-3 border-t border-ink/[0.07] py-3 first:border-t-0 first:pt-0 last:pb-0">'
+                '<div class="min-w-0 flex-1">'
+                f'<p class="text-[12.5px] font-medium leading-relaxed">{inline(field(item, "symptom"))}</p>'
+                f'<p class="mt-1 text-[12px] leading-relaxed text-muted">{inline(field(item, "fix"))}</p>'
+                "</div></li>"
+            )
+        body.append(
+            '<div class="mt-7 rounded-xl border border-ink/10 bg-surface/70 p-4 sm:p-5">'
+            f'{label("문제가 생겼을 때")}'
+            '<ul class="mt-3">' + "".join(items) + "</ul>"
+            "</div>"
+        )
+
+    aside = (
+        '<div class="hidden text-right sm:block">'
+        f'{label("alpha · 무료 · MIT", "rust")}'
+        "</div>"
+    )
+    return panel("usage", number, "Getting started", "설치하고, 켜고, 읽는 법", aside, "".join(body), hidden)
+
+
+# --------------------------------------------------------------------------
+# Tab 03 — providers
 # --------------------------------------------------------------------------
 
 PROVIDER_TONES = {
@@ -1499,12 +1632,13 @@ def build_document(data, facts, generated_at):
 
     panels = [
         render_overview(data, facts, "01", False),
-        render_providers(data, facts, "02", True),
-        render_architecture(data, facts, "03", True),
-        render_security(data, facts, "04", True),
-        render_roadmap(data, facts, "05", True),
-        render_decisions(data, facts, "06", True),
-        render_log(data, facts, "07", True),
+        render_usage(data, facts, "02", True),
+        render_providers(data, facts, "03", True),
+        render_architecture(data, facts, "04", True),
+        render_security(data, facts, "05", True),
+        render_roadmap(data, facts, "06", True),
+        render_decisions(data, facts, "07", True),
+        render_log(data, facts, "08", True),
     ]
 
     favicon = (
