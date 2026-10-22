@@ -1,0 +1,29 @@
+{
+  "data": {
+    "label": "fixture-key-label",
+    "limit": 20.0,
+    "usage": 11.5,
+    "limit_remaining": 8.5,
+    "limit_reset": "monthly",
+    "is_free_tier": false,
+    "is_provisioning_key": false,
+    "rate_limit": {
+      "requests": 60,
+      "interval": "10s"
+    },
+    "effective_budget": {
+      "limit_usd": 20.0,
+      "remaining_usd": 8.5,
+      "limit_reset": "monthly",
+      "resets_at": "2026-11-01T00:00:00.000Z"
+    },
+    "budgets": [
+      {
+        "limit_usd": 20.0,
+        "remaining_usd": 8.5,
+        "limit_reset": "monthly",
+        "resets_at": "2026-11-01T00:00:00.000Z"
+      }
+    ]
+  }
+}

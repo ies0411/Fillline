@@ -15,6 +15,8 @@ third-party dependencies.
 - **5-hour session + weekly (7-day) windows** for Claude Code and Codex, each with a reset
   countdown. Claude Code's additional scoped windows are shown when present.
 - **Rolling (5h) + weekly + monthly windows** for OpenCode Go.
+- **Monthly AI-credit allowance** for GitHub Copilot, and a **USD credit balance** for
+  OpenRouter — shown as an amount (`$8.50 left`), never as an invented percentage.
 - **Honest staleness.** When a refresh fails the card keeps the last known-good value and
   labels it `stale · 4m ago`. Values are never fabricated, and never silently reset to 0%.
 - **Independent per-provider failure isolation.** One provider being down, rate-limited,
@@ -44,6 +46,9 @@ remaining.
 | **Claude Code** | `GET https://api.anthropic.com/api/oauth/usage` with `anthropic-beta: oauth-2025-04-20` and a required `User-Agent: claude-code/*` header | OAuth access token from the Keychain item `Claude Code-credentials` | Never written back, never refreshed. Missing/blocked `User-Agent` triggers a 429 storm. Polled at most every **180 s**; exponential backoff on 429. Fallback is local aggregation of `~/.claude/projects/**/*.jsonl`, labelled `estimated`. |
 | **OpenAI Codex** | `codex app-server` JSON-RPC `account/rateLimits/read` (documented local interface) — *wired in Phase 2; until then the app uses the HTTP path below* | `~/.codex/auth.json`, handed to the CLI — the app never rewrites it | Fallback: `GET https://chatgpt.com/backend-api/wham/usage` with the token from `~/.codex/auth.json`. Last resort: `rate_limits` blocks in `~/.codex/sessions/**/*.jsonl`. Reset times are **epoch seconds**. Codex not installed → `not installed` card. |
 | **OpenCode Go** | `GET https://opencode.ai/zen/go/v1/usage` with a Bearer `oc_sk_…` key | `~/.config/opencode/.secrets/opencode-key`, or `$OPENCODE_API_KEY` (env wins) | Returns `rolling` (5h), `weekly`, and `monthly` windows; `percent` is 0–100 *used*. HTTP 403 means no active subscription → `not subscribed`, not an error. |
+
+| **GitHub Copilot** | `GET https://api.github.com/copilot_internal/user` (internal) | token from `gh auth token` — read-only, never stored | `percent_remaining` is 0–100 **remaining**, the third unit convention in this app; `unlimited` and zero-entitlement buckets are labelled, never 0%. |
+| **OpenRouter** | `GET https://openrouter.ai/api/v1/key` | `$OPENROUTER_API_KEY`, the OpenCode auth file, or a key you paste into Settings | No percentages: only USD amounts, rendered as text rows. Account balance needs a management key, so only the per-key budget is shown. |
 
 Every provider uses a `primary → fallback → cached` ladder, and each has its own
 `Endpoints.swift` holding the URLs, headers, and parsing keys — so breakage is a one-file
@@ -145,7 +150,8 @@ notarized universal release and needs your own Developer ID — no identities ar
   for sparklines.
 - [ ] **Phase 3 — distribution.** Developer ID signing + notarization, DMG, Homebrew cask,
   README screenshots, GitHub Actions release workflow.
-- [ ] **Phase 4 — optional.** Antigravity provider, cost-conversion view.
+- [x] **Phase 4 — more providers.** Antigravity (opt-in), GitHub Copilot, OpenRouter.
+  Still optional: a cost-conversion view, Windows support (see issue #11).
 
 ## Naming and trademarks
 

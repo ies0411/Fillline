@@ -11,6 +11,7 @@ struct WindowRow: View {
     let now: Date
 
     private var remaining: Double { window.remainingFraction }
+    private var isAmountRow: Bool { UsageFormat.isAmountRow(window) }
     private var severity: RemainingSeverity { UsageFormat.severity(remainingFraction: remaining) }
     private var reset: UsageFormat.ResetLabel {
         UsageFormat.resetLabel(
@@ -23,49 +24,76 @@ struct WindowRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(UsageFormat.remainingText(remaining))
-                    .font(.system(size: 20, weight: .semibold).monospacedDigit())
-                    .foregroundStyle(.primary)
-                    .contentTransition(.numericText())
-                    .fixedSize()
-
-                Text(window.label)
-                    .font(.system(size: 9.5, weight: .semibold))
-                    .tracking(0.7)
-                    .textCase(.uppercase)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-
-                if severity == .critical {
-                    LowCue()
-                }
-
-                Spacer(minLength: 6)
-
-                Text(reset.text)
-                    .font(.system(size: 9.5, weight: .regular).monospacedDigit())
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-
-                if !reset.isResetting {
-                    Text("·")
-                        .font(.system(size: 9, weight: .regular))
-                        .foregroundStyle(.tertiary)
-                        .accessibilityHidden(true)
-                    Text(UsageFormat.usedText(window.usedFraction))
-                        .font(.system(size: 9.5, weight: .regular).monospacedDigit())
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .fixedSize()
-                }
+            if isAmountRow {
+                amountHeader
+            } else {
+                percentHeader
+                MeterBar(remainingFraction: remaining, severity: severity)
             }
-
-            MeterBar(remainingFraction: remaining, severity: severity)
         }
         .animation(.easeOut(duration: 0.35), value: remaining)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(UsageFormat.accessibilityLabel(for: window, now: now)))
+    }
+
+    /// USD credits: the label *is* the value (`"$8.50 left"`), so there is no percentage and no
+    /// meter — an empty or full bar would claim a fraction the provider never reported.
+    private var amountHeader: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(window.label)
+                .font(.system(size: 18, weight: .semibold).monospacedDigit())
+                .foregroundStyle(.primary)
+                .fixedSize()
+
+            Spacer(minLength: 6)
+
+            if window.resetsAt != nil {
+                Text(reset.text)
+                    .font(.system(size: 9.5, weight: .regular).monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    private var percentHeader: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(UsageFormat.remainingText(remaining))
+                .font(.system(size: 20, weight: .semibold).monospacedDigit())
+                .foregroundStyle(.primary)
+                .contentTransition(.numericText())
+                .fixedSize()
+
+            Text(window.label)
+                .font(.system(size: 9.5, weight: .semibold))
+                .tracking(0.7)
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+
+            if severity == .critical {
+                LowCue()
+            }
+
+            Spacer(minLength: 6)
+
+            Text(reset.text)
+                .font(.system(size: 9.5, weight: .regular).monospacedDigit())
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+
+            if !reset.isResetting {
+                Text("·")
+                    .font(.system(size: 9, weight: .regular))
+                    .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
+                Text(UsageFormat.usedText(window.usedFraction))
+                    .font(.system(size: 9.5, weight: .regular).monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+        }
     }
 }
 

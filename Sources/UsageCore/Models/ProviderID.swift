@@ -8,6 +8,8 @@ public enum ProviderID: String, Codable, Sendable, Hashable, CaseIterable, Ident
     case codex = "codex"
     case openCodeGo = "opencode-go"
     case antigravity = "antigravity"
+    case githubCopilot = "github-copilot"
+    case openRouter = "openrouter"
 
     public var id: String { rawValue }
 
@@ -18,6 +20,8 @@ public enum ProviderID: String, Codable, Sendable, Hashable, CaseIterable, Ident
         case .codex: "O"
         case .openCodeGo: "G"
         case .antigravity: "A"
+        case .githubCopilot: "P"
+        case .openRouter: "R"
         }
     }
 
@@ -28,6 +32,8 @@ public enum ProviderID: String, Codable, Sendable, Hashable, CaseIterable, Ident
         case .codex: "OpenAI Codex"
         case .openCodeGo: "OpenCode Go"
         case .antigravity: "Antigravity"
+        case .githubCopilot: "GitHub Copilot"
+        case .openRouter: "OpenRouter"
         }
     }
 }

@@ -194,9 +194,23 @@ final class AppModel {
     /// interval is enforced one level up, in `tick()`, so changing it never rebuilds the
     /// scheduler or loses its rate-limit state.
     private static let schedulerBaseInterval: TimeInterval = 60
-    private static let claudeMinimumInterval: TimeInterval = 180
-    /// `agy` is a cold-start subprocess (~seconds), so poll it far less often.
-    private static let antigravityMinimumInterval: TimeInterval = 300
+
+    /// Per-provider floor, applied to scheduled polls *and* manual refreshes.
+    ///
+    /// - Claude Code: its endpoint rate-limits aggressively (AGENTS §2, 180s).
+    /// - Antigravity: `agy` is a cold-start subprocess, so it polls far less often.
+    /// - GitHub Copilot: the documented floor is 60s, i.e. the base interval.
+    /// - OpenRouter: 120s (issue #13) — a credit balance does not move that fast.
+    private static let minimumIntervals: [ProviderID: TimeInterval] = [
+        .claudeCode: 180,
+        .antigravity: 300,
+        .githubCopilot: 60,
+        .openRouter: 120,
+    ]
+
+    /// Providers that read a credential or spawn a process and therefore start **off**
+    /// (AGENTS §2). Everything else is on by default.
+    static let optInProviders: Set<ProviderID> = [.antigravity, .githubCopilot, .openRouter]
 
     init(
         defaults: UserDefaults = .standard,
@@ -221,8 +235,10 @@ final class AppModel {
         if let stored = defaults.array(forKey: Keys.enabledProviders) as? [String] {
             self.enabledProviders = Set(stored.compactMap(ProviderID.init(rawValue:)))
         } else {
-            // Antigravity spawns a CLI subprocess, so it starts off (AGENTS §2).
-            self.enabledProviders = Set(ProviderID.allCases.filter { $0 != .antigravity })
+            // Opt-in providers read a credential or spawn a CLI; they start off (AGENTS §2).
+            self.enabledProviders = Set(
+                ProviderID.allCases.filter { !Self.optInProviders.contains($0) }
+            )
         }
 
         rebuildScheduler()
@@ -243,15 +259,17 @@ final class AppModel {
         self.notificationKeys = NotificationKeyStore(defaults: .standard)
         self.scheduler = PollScheduler(providers: [], configuration: .init())
 
-        // All four cards, with Claude's OAuth read on: the dashboard only draws a Claude window
-        // when that consent flag is set, and Antigravity is off by default.
+        // All four documented cards, with Claude's OAuth read on: the dashboard only draws a
+        // Claude window when that consent flag is set, and Antigravity is off by default.
         self.claudeOAuthReadEnabled = true
         self.notificationsEnabled = false
         self.pollInterval = .balanced
         self.menuBarStyle = .all
         self.menuBarNumber = .primary
         self.hasCompletedOnboarding = true
-        self.enabledProviders = Set(ProviderID.allCases)
+        // Exactly the providers the fixture panel has data for, so a screenshot never shows a
+        // card stuck on "Checking…" for a provider it cannot fill in.
+        self.enabledProviders = Set(panel.snapshots.keys)
 
         self.snapshots = panel.snapshots
         self.sparklines = panel.sparklines
@@ -297,19 +315,41 @@ final class AppModel {
 
     /// Value shown in the menu bar, after the user's window preference. `nil` means the
     /// provider is omitted (no data), never rendered as 0%.
-    private func menuBarFraction(for snapshot: UsageSnapshot) -> Double? {
+    ///
+    /// A `.credits` row carrying USD (`isAmountRow`) has no fraction; it returns `text` instead,
+    /// so the menu bar shows `R $8.50` rather than a made-up percentage.
+    private func menuBarValue(for snapshot: UsageSnapshot) -> (fraction: Double?, text: String?)? {
         switch menuBarNumber {
         case .primary:
-            snapshot.primaryWindow?.remainingFraction
+            return menuBarValue(for: snapshot.primaryWindow)
         case .session:
-            (snapshot.window(kind: .session5h)
-                ?? snapshot.window(kind: .rolling)
-                ?? snapshot.primaryWindow)?.remainingFraction
+            return menuBarValue(
+                for: snapshot.window(kind: .session5h)
+                    ?? snapshot.window(kind: .rolling)
+                    ?? snapshot.primaryWindow
+            )
         case .weekly:
-            (snapshot.window(kind: .weekly7d) ?? snapshot.primaryWindow)?.remainingFraction
+            return menuBarValue(
+                for: snapshot.window(kind: .weekly7d) ?? snapshot.primaryWindow
+            )
         case .lowest:
-            snapshot.lowestRemainingFraction
+            // Amount rows are excluded: they have no fraction to compare.
+            let fractions = snapshot.windows
+                .filter { !UsageFormat.isAmountRow($0) }
+                .map(\.remainingFraction)
+            if let lowest = fractions.min() {
+                return (lowest, nil)
+            }
+            return menuBarValue(for: snapshot.primaryWindow)
         }
+    }
+
+    private func menuBarValue(for window: LimitWindow?) -> (fraction: Double?, text: String?)? {
+        guard let window else { return nil }
+        if UsageFormat.isAmountRow(window) {
+            return (nil, UsageFormat.menuBarAmount(window.label))
+        }
+        return (window.remainingFraction, nil)
     }
 
     var menuBarContent: UsageFormat.MenuBarContent {
@@ -321,7 +361,7 @@ final class AppModel {
             guard provider != .claudeCode || claudeOAuthReadEnabled else { return nil }
             guard let snapshot = snapshots[provider],
                 snapshot.hasValues,
-                let fraction = menuBarFraction(for: snapshot)
+                let value = menuBarValue(for: snapshot)
             else {
                 return nil
             }
@@ -330,7 +370,8 @@ final class AppModel {
             case .ok:
                 return UsageFormat.MenuBarEntry(
                     provider: provider,
-                    remainingFraction: fraction,
+                    remainingFraction: value.fraction,
+                    text: value.text,
                     isApproximate: false
                 )
             case .stale(let age):
@@ -338,7 +379,8 @@ final class AppModel {
                 guard age <= UsageFormat.menuBarStaleLimit else { return nil }
                 return UsageFormat.MenuBarEntry(
                     provider: provider,
-                    remainingFraction: fraction,
+                    remainingFraction: value.fraction,
+                    text: value.text,
                     isApproximate: true
                 )
             default:
@@ -396,10 +438,12 @@ final class AppModel {
 
         for provider in pollableProviders {
             if force {
-                // Even a manual refresh must not hammer Claude's endpoint.
-                if provider == .claudeCode,
+                // Even a manual refresh must not hammer a provider below its floor. Providers
+                // whose floor is the base interval keep the old "force means now" behaviour.
+                let floor = Self.minimumIntervals[provider] ?? Self.schedulerBaseInterval
+                if floor > Self.schedulerBaseInterval,
                     let last = lastAttemptAt[provider],
-                    now.timeIntervalSince(last) < Self.claudeMinimumInterval
+                    now.timeIntervalSince(last) < floor
                 {
                     continue
                 }
@@ -474,10 +518,7 @@ final class AppModel {
     // MARK: Pipeline
 
     private func effectiveInterval(for provider: ProviderID) -> TimeInterval {
-        if provider == .claudeCode {
-            return max(pollInterval.seconds, Self.claudeMinimumInterval)
-        }
-        return max(pollInterval.seconds, Self.schedulerBaseInterval)
+        max(pollInterval.seconds, Self.minimumIntervals[provider] ?? Self.schedulerBaseInterval)
     }
 
     private func makeProviders() -> [any UsageProvider] {
@@ -496,6 +537,14 @@ final class AppModel {
         if enabledProviders.contains(.antigravity) {
             providers.append(AntigravityProvider())
         }
+        // Opt-in too: Copilot reads the token `gh` already holds (via `gh auth token`), and
+        // OpenRouter needs a key the user has to provide. Both stay off until asked for.
+        if enabledProviders.contains(.githubCopilot) {
+            providers.append(GitHubCopilotProvider())
+        }
+        if enabledProviders.contains(.openRouter) {
+            providers.append(OpenRouterProvider())
+        }
         return providers
     }
 
@@ -505,10 +554,7 @@ final class AppModel {
             configuration: .init(
                 baseInterval: Self.schedulerBaseInterval,
                 staleAfter: staleAfter,
-                minimumIntervalOverrides: [
-                    .claudeCode: Self.claudeMinimumInterval,
-                    .antigravity: Self.antigravityMinimumInterval,
-                ]
+                minimumIntervalOverrides: Self.minimumIntervals
             )
         )
     }
@@ -615,9 +661,13 @@ final class AppModel {
 
     private static func sparklineWindow(in snapshot: UsageSnapshot) -> LimitWindow? {
         for kind in sparklineWindowPreference {
-            if let window = snapshot.window(kind: kind) { return window }
+            // Amount rows (USD credits) have no fraction, so a line would be flat fiction.
+            if let window = snapshot.window(kind: kind), !UsageFormat.isAmountRow(window) {
+                return window
+            }
         }
-        return snapshot.primaryWindow
+        guard let first = snapshot.primaryWindow, !UsageFormat.isAmountRow(first) else { return nil }
+        return first
     }
 
     // MARK: Notifications

@@ -230,6 +230,8 @@ struct SettingsView: View {
         case .codex: "Session and weekly windows"
         case .openCodeGo: "Rolling, weekly, and monthly windows"
         case .antigravity: "Runs agy once per poll — no credential access"
+        case .githubCopilot: "Premium requests, via the token gh already holds"
+        case .openRouter: "USD credit balance, not a percentage"
         }
     }
 }

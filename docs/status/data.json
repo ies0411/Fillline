@@ -7,7 +7,7 @@
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
     "version": "v0.2.1-alpha.1",
     "license": "MIT",
-    "commits": 33,
+    "commits": 37,
     "branch": "main",
     "pushed": true,
     "issues": 8,
@@ -22,7 +22,7 @@
   "stats": [
     {
       "label": "Provider",
-      "value": "4",
+      "value": "6",
       "sub": "Claude Code · Codex · OpenCode Go · Antigravity"
     },
     {
@@ -502,6 +502,14 @@
     {
       "date": "2026-10-21",
       "text": "수익화 방향 확정 — 후원(Sponsors)만 운영, Developer Program 가입은 월 $15 × 3개월 달성 시로 보류 (고정비가 수익의 절반을 먹는 구조 회피)"
+    },
+    {
+      "date": "2026-10-22",
+      "text": "Copilot provider 구현 — `gh auth token`(토큰 복사·저장 없음), `percent_remaining`(0–100 남은 값)이라는 세 번째 극성 전용 파서. 실 엔드포인트 200 확인"
+    },
+    {
+      "date": "2026-10-22",
+      "text": "OpenRouter provider 구현 — 퍼센트가 없는 API라 `$8.50 left` 금액 행으로 표시, 미터·메뉴바 %·스파크라인에서 제외"
     }
   ]
 }

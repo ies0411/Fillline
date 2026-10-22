@@ -13,8 +13,13 @@ public final class URLSessionHTTPClient: HTTPClient, @unchecked Sendable {
     /// single-sourced in `Endpoints.swift` files.
     public static var defaultAllowedHosts: Set<String> {
         Set(
-            [ClaudeCodeEndpoints.host, CodexEndpoints.host, OpenCodeGoEndpoints.host]
-                .filter { !$0.isEmpty }
+            [
+                ClaudeCodeEndpoints.host,
+                CodexEndpoints.host,
+                OpenCodeGoEndpoints.host,
+                GitHubCopilotEndpoints.host,
+                OpenRouterEndpoints.host,
+            ].filter { !$0.isEmpty }
         )
     }
 

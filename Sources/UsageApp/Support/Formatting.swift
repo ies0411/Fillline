@@ -164,16 +164,50 @@ enum UsageFormat {
         }
 
         return
-            "\(window.label), \(remainingText(window.remainingFraction)) remaining, \(resetPhrase), \(usedText(window.usedFraction))"
+            isAmountRow(window)
+            ? "\(window.label), \(resetPhrase)"
+            : "\(window.label), \(remainingText(window.remainingFraction)) remaining, \(resetPhrase), \(usedText(window.usedFraction))"
+    }
+
+    // MARK: Amount rows
+
+    /// A row that carries an absolute amount instead of a fraction (OpenRouter USD credits).
+    ///
+    /// The contract is the label shape agreed for issue #13: a `.credits` row whose label starts
+    /// with `$` is money. Such a row is rendered as text only — no meter, no percentage, no
+    /// "x% used" caption — and is kept out of every percent-driven surface (menu bar number,
+    /// sparkline). The model itself is unchanged: there is no optional fraction to add.
+    static func isAmountRow(_ window: LimitWindow) -> Bool {
+        window.kind == .credits && window.label.hasPrefix("$")
+    }
+
+    /// `"$8.50 left · no cap"` → `"$8.50"` for the menu bar.
+    static func menuBarAmount(_ label: String) -> String {
+        label.split(separator: " ").first.map(String.init) ?? label
     }
 
     // MARK: Menu bar
 
     struct MenuBarEntry: Sendable, Hashable {
         let provider: ProviderID
-        let remainingFraction: Double
+        /// `nil` for an amount row (USD credits), which has no fraction to show.
+        let remainingFraction: Double?
+        /// Verbatim value for entries that are not percentages (e.g. `"$8.50"`).
+        let text: String?
         /// Value is last-known, not fresh; rendered with a `~` prefix.
         let isApproximate: Bool
+
+        init(
+            provider: ProviderID,
+            remainingFraction: Double?,
+            text: String? = nil,
+            isApproximate: Bool
+        ) {
+            self.provider = provider
+            self.remainingFraction = remainingFraction
+            self.text = text
+            self.isApproximate = isApproximate
+        }
     }
 
     struct MenuBarSegment: Identifiable, Equatable, Sendable {
@@ -209,47 +243,59 @@ enum UsageFormat {
         case .compact, .worst:
             shown =
                 entries.min { lhs, rhs in
-                    lhs.remainingFraction < rhs.remainingFraction
+                    (lhs.remainingFraction ?? 1) < (rhs.remainingFraction ?? 1)
                 }.map { [$0] } ?? []
         }
 
         let segments = shown.map { entry -> MenuBarSegment in
-            let value = "\(entry.isApproximate ? "~" : "")\(remainingText(entry.remainingFraction))"
+            let fraction = entry.remainingFraction
+            let value: String
+            if let text = entry.text {
+                value = entry.isApproximate ? "~\(text)" : text
+            } else {
+                let percent = remainingText(fraction ?? 0)
+                value = "\(entry.isApproximate ? "~" : "")\(percent)"
+            }
+            let isCritical = (fraction ?? 1) < criticalThreshold
             switch style {
             case .all:
                 return MenuBarSegment(
                     id: entry.provider.rawValue,
                     symbolName: nil,
                     text: "\(entry.provider.shortLabel) \(value)",
-                    isCritical: entry.remainingFraction < criticalThreshold
+                    isCritical: isCritical
                 )
             case .glyphs, .compact:
                 return MenuBarSegment(
                     id: entry.provider.rawValue,
                     symbolName: entry.provider.symbolName,
                     text: value,
-                    isCritical: entry.remainingFraction < criticalThreshold
+                    isCritical: isCritical
                 )
             case .worst:
                 return MenuBarSegment(
                     id: entry.provider.rawValue,
                     symbolName: nil,
                     text: "\(entry.provider.shortLabel) \(value)",
-                    isCritical: entry.remainingFraction < criticalThreshold
+                    isCritical: isCritical
                 )
             }
         }
 
         let spoken = shown.map { entry -> String in
-            let percent = remainingText(entry.remainingFraction)
+            if let text = entry.text {
+                return "\(entry.provider.displayName) \(entry.isApproximate ? "approximately " : "")\(text)"
+            }
+            let fraction = entry.remainingFraction ?? 0
+            let percent = remainingText(fraction)
             let approximate = entry.isApproximate ? "approximately " : ""
-            let low = entry.remainingFraction < criticalThreshold ? ", low" : ""
+            let low = fraction < criticalThreshold ? ", low" : ""
             return "\(entry.provider.displayName) \(approximate)\(percent) remaining\(low)"
         }
 
         return MenuBarContent(
             segments: segments,
-            showsWarning: shown.contains { $0.remainingFraction < criticalThreshold },
+            showsWarning: shown.contains { ($0.remainingFraction ?? 1) < criticalThreshold },
             accessibilityLabel: "Usage. " + spoken.joined(separator: ". ") + "."
         )
     }
@@ -265,6 +311,8 @@ extension ProviderID {
         case .codex: "chevron.left.forwardslash.chevron.right"
         case .openCodeGo: "bolt.fill"
         case .antigravity: "hexagon"
+        case .githubCopilot: "checkmark.seal"
+        case .openRouter: "arrow.triangle.branch"
         }
     }
 
@@ -275,6 +323,8 @@ extension ProviderID {
         case .codex: "Codex"
         case .openCodeGo: "OpenCode Go"
         case .antigravity: "Antigravity"
+        case .githubCopilot: "Copilot"
+        case .openRouter: "OpenRouter"
         }
     }
 
@@ -285,6 +335,8 @@ extension ProviderID {
         case .codex: "codex"
         case .openCodeGo: nil
         case .antigravity: "agy"
+        case .githubCopilot: "gh auth login"
+        case .openRouter: nil
         }
     }
 }

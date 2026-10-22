@@ -9,6 +9,22 @@ broken parser ships as a patch release.
 
 ## [Unreleased]
 
+### Added
+- **GitHub Copilot** provider (opt-in). Reads `GET https://api.github.com/copilot_internal/user`
+  with a token obtained from `gh auth token` — no credential is copied, stored, or refreshed.
+  Shows the monthly AI-credit allowance and the chat allowance. Copilot reports
+  `percent_remaining` (0–100 **remaining**), the opposite polarity of Claude/Codex/OpenCode Go,
+  so its parser is deliberately separate; `unlimited` and zero-entitlement buckets are shown as
+  such and never as 0% used.
+- **OpenRouter** provider (opt-in). Reads `GET https://openrouter.ai/api/v1/key`. OpenRouter
+  exposes **no percentage at all**, only USD amounts, so the card shows `$8.50 left` and draws no
+  meter — inventing a 0–100% bar from an unknown ceiling would break the "never mislabel" rule.
+  Account balance needs a management key, so only per-key budget is read.
+
+### Fixed
+- Amount-only windows (OpenRouter) no longer render as an empty meter, and are excluded from the
+  menu-bar percentage, the "lowest" summary, and sparklines.
+
 ## [0.2.1-alpha.1] — 2026-10-21
 
 Third alpha. One visible change: a stale card now tells you *why* it is stale.

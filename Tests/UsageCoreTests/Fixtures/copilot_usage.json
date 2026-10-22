@@ -1,0 +1,45 @@
+{
+  "login": "octocat",
+  "copilot_plan": "individual",
+  "access_type_sku": "copilot_individual",
+  "chat_enabled": true,
+  "quota_reset_date": "2026-11-01",
+  "quota_reset_date_utc": "2026-11-01T00:00:00.000Z",
+  "quota_snapshots": {
+    "premium_interactions": {
+      "entitlement": 300,
+      "overage_count": 0,
+      "overage_permitted": false,
+      "percent_remaining": 40,
+      "quota_id": "premium_interactions",
+      "quota_remaining": 120,
+      "remaining": 120,
+      "unlimited": false,
+      "quota_reset_at": 1793520000,
+      "timestamp_utc": "2026-10-21T08:00:00.000Z"
+    },
+    "chat": {
+      "entitlement": "500",
+      "percent_remaining": "75",
+      "quota_id": "chat",
+      "remaining": "375",
+      "unlimited": false,
+      "timestamp_utc": "2026-10-21T08:00:00.000Z"
+    },
+    "completions": {
+      "entitlement": 2000,
+      "percent_remaining": 100,
+      "quota_id": "completions",
+      "remaining": 2000,
+      "unlimited": true
+    },
+    "premium_requests": {
+      "entitlement": 0,
+      "percent_remaining": 0,
+      "quota_id": "premium_requests",
+      "remaining": 0,
+      "unlimited": false
+    },
+    "mystery_bucket": "not-an-object"
+  }
+}
