@@ -28,7 +28,6 @@
     "NeverForceUnwrap": false,
     "NeverUseForceTry": false,
     "NeverUseImplicitlyUnwrappedOptionals": false,
-    "NoEmptyLinesOpeningClosingBraces": false,
     "NoLeadingUnderscores": false,
     "OmitExplicitReturns": false,
     "UseEarlyExits": false,
