@@ -5,9 +5,9 @@
     "repo": "https://github.com/ies0411/Fillline",
     "status": "pre-alpha",
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
-    "version": "v0.4.0-alpha.1",
+    "version": "v0.5.0-alpha.1",
     "license": "MIT",
-    "commits": 41,
+    "commits": 42,
     "branch": "main",
     "pushed": true,
     "issues": 8,
@@ -526,6 +526,10 @@
     {
       "date": "2026-10-23",
       "text": "Claude 로컬 로그 집계 구현 — 토큰 읽기 off 상태에서도 카드가 5h/7d 토큰 수량을 표시(퍼센트 없음, `estimated`). 테스트 151개"
+    },
+    {
+      "date": "2026-10-23",
+      "text": "v0.5.0-alpha.1 릴리스 — Claude 로컬 추정이 기본 경로가 되고, 퍼센트를 지어내지 않는 원칙 유지"
     }
   ],
   "usage": {

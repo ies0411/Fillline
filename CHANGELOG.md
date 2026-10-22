@@ -9,6 +9,11 @@ broken parser ships as a patch release.
 
 ## [Unreleased]
 
+## [0.5.0-alpha.1] — 2026-10-23
+
+Fifth alpha. One change, and it is about honesty: the Claude card no longer needs a credential to
+say something true.
+
 ### Added
 - **Claude Code local-log estimate** (issue #16). With the token read off — the default — the
   Claude card now counts tokens from the JSONL transcripts under `~/.claude/projects` instead of
