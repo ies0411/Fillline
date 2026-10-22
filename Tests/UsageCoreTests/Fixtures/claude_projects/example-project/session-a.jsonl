@@ -1,0 +1,12 @@
+{"type":"user","timestamp":"2026-10-21T11:45:00.000Z","message":{"usage":{"input_tokens":999999,"output_tokens":999999,"cache_creation_input_tokens":999999,"cache_read_input_tokens":999999}}}
+{"type":"assistant","timestamp":"2026-10-21T11:30:00.000Z","requestId":"req_a","message":{"model":"claude-opus-5-5","usage":{"input_tokens":100,"output_tokens":200,"cache_creation_input_tokens":1000,"cache_read_input_tokens":2000,"output_tokens_details":{"thinking_tokens":98},"cache_creation":{"ephemeral_5m_input_tokens":1000,"ephemeral_1h_input_tokens":0},"service_tier":"standard","speed":"standard"}}}
+{"type":"api-request","timestamp":"2026-10-21T11:20:00.000Z","requestId":"req_api"}
+{"type":"assistant","timestamp":"2026-10-21T09:00:00.000Z","requestId":"req_b","message":{"model":"claude-opus-5-5","usage":{"input_tokens":100,"output_tokens":200,"cache_creation_input_tokens":300,"cache_read_input_tokens":400}}}
+{"type":"assistant","timestamp":"2026-10-20T12:00:00.000Z","requestId":"req_c","message":{"usage":{"input_tokens":1,"output_tokens":2,"cache_creation_input_tokens":3,"cache_read_input_tokens":4}}}
+{"type":"assistant","timestamp":"2026-10-21T11:30:00.000Z","requestId":"req_a","message":{"usage":{"input_tokens":100,"output_tokens":200,"cache_creation_input_tokens":1000,"cache_read_input_tokens":2000}}}
+{"type":"assistant","timestamp":"2026-10-21T07:00:00.000Z","requestId":"req_d","message":{"usage":{"input_tokens":10,"output_tokens":20,"cache_creation_input_tokens":30,"cache_read_input_tokens":40}}}
+{"type":"assistant","timestamp":"2026-10-21T06:59:59.999Z","requestId":"req_e","message":{"usage":{"input_tokens":100,"output_tokens":200,"cache_creation_input_tokens":300,"cache_read_input_tokens":400}}}
+{"type":"assistant","timestamp":"2026-10-10T00:00:00.000Z","requestId":"req_old","message":{"usage":{"input_tokens":5000}}}
+{"type":"assistant","timestamp":"2026-10-21T11:00:00.000Z","message":{"usage":{"input_tokens":
+{"type":"attachment","timestamp":"2026-10-21T10:00:00.000Z"}
+{"type":"permission-mode","timestamp":"2026-10-21T10:00:00.000Z","mode":"default"}

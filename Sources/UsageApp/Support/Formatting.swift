@@ -171,19 +171,30 @@ enum UsageFormat {
 
     // MARK: Amount rows
 
-    /// A row that carries an absolute amount instead of a fraction (OpenRouter USD credits).
+    /// A row that carries an absolute amount instead of a fraction.
     ///
-    /// The contract is the label shape agreed for issue #13: a `.credits` row whose label starts
-    /// with `$` is money. Such a row is rendered as text only — no meter, no percentage, no
-    /// "x% used" caption — and is kept out of every percent-driven surface (menu bar number,
-    /// sparkline). The model itself is unchanged: there is no optional fraction to add.
+    /// Two shapes exist today:
+    /// - `.credits` whose label starts with `$` (OpenRouter's USD balance, issue #13);
+    /// - an `isEstimated` row whose label carries a token quantity (Claude's local-log estimate,
+    ///   issue #16 — local logs have no plan limit, so no fraction can exist).
+    ///
+    /// Such a row is rendered as text only — no meter, no percentage, no "x% used" caption — and
+    /// is kept out of every percent-driven surface (menu bar number, sparkline, alerts). The
+    /// model itself is unchanged: there is no optional fraction to add.
     static func isAmountRow(_ window: LimitWindow) -> Bool {
-        window.kind == .credits && window.label.hasPrefix("$")
+        if window.kind == .credits && window.label.hasPrefix("$") { return true }
+        return window.isEstimated && window.label.contains(" tokens")
     }
 
     /// `"$8.50 left · no cap"` → `"$8.50"` for the menu bar.
+    ///
+    /// A token estimate keeps its unit (`"1.2M tok"`): a bare `1.2M` would read as a quota, and
+    /// the unit is what says "this is a count, not a percentage".
     static func menuBarAmount(_ label: String) -> String {
-        label.split(separator: " ").first.map(String.init) ?? label
+        let parts = label.split(separator: " ")
+        guard let first = parts.first else { return label }
+        if parts.count > 1, parts[1] == "tokens" { return "\(first) tok" }
+        return String(first)
     }
 
     // MARK: Menu bar

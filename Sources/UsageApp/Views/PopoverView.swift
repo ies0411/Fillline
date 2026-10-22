@@ -505,13 +505,21 @@ private struct OnboardingView: View {
 
             Text(
                 model.claudeOAuthReadEnabled
-                    ? "On · read-only, held in memory only." : "Off · local logs only."
+                    ? "On · read-only, held in memory only."
+                    : "Off · the card estimates your own token use from local logs."
             )
             .font(.system(size: 10))
             .foregroundStyle(.secondary)
 
             Text(
                 "The only provider that reads a stored credential. Anthropic's policy doesn't allow apps to collect Claude.ai credentials, so this stays off unless you choose it."
+            )
+            .font(.system(size: 10))
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+
+            Text(
+                "Off, the card counts tokens from the Claude Code logs in ~/.claude, read-only. That is your own usage, not the remaining quota — only the token read shows the real percentage."
             )
             .font(.system(size: 10))
             .foregroundStyle(.secondary)

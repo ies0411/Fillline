@@ -18,14 +18,16 @@ struct ProviderCard: View {
         VStack(alignment: .leading, spacing: 9) {
             header
 
-            if provider == .claudeCode, !isClaudeOAuthReadEnabled {
-                localOnlyState
-            } else if let snapshot, !snapshot.windows.isEmpty {
+            if let snapshot, !snapshot.windows.isEmpty {
+                // Local-log estimates (issue #16) reach this branch too: with the token read off
+                // the card still has token totals to show.
                 windows(snapshot)
                 sparkline
                 if snapshot.status.isFailure {
                     StatusFooter(snapshot: snapshot, now: now)
                 }
+            } else if provider == .claudeCode, !isClaudeOAuthReadEnabled {
+                localOnlyState
             } else if let snapshot {
                 unavailableState(for: snapshot)
             } else {
@@ -134,17 +136,18 @@ struct ProviderCard: View {
         .accessibilityLabel(Text("Checking \(provider.displayName) usage"))
     }
 
-    /// Claude's OAuth read is off. This is a consent state, not an error.
+    /// Token read is off and there are no local logs to count yet. A consent/empty state, not an
+    /// error: the card is meant to work without the login at all (issue #16).
     private var localOnlyState: some View {
         HStack(alignment: .top, spacing: 9) {
             stateIcon("doc.text.magnifyingglass")
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("Local logs only")
+                Text("No local estimate yet")
                     .font(.system(size: 12, weight: .semibold))
 
                 Text(
-                    "Reading the Claude Code login is off, so this app isn't using it. Local-log estimates aren't available in this build."
+                    "This card estimates your own token use from the Claude Code logs in ~/.claude — read-only, no login needed. Nothing has been logged yet. Turning on the token read shows the real remaining quota instead."
                 )
                 .font(.system(size: 10.5))
                 .foregroundStyle(.secondary)

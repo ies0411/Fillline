@@ -112,10 +112,13 @@ final class AppModel {
         didSet {
             guard oldValue != claudeOAuthReadEnabled else { return }
             defaults.set(claudeOAuthReadEnabled, forKey: Keys.claudeOAuthReadEnabled)
-            if !claudeOAuthReadEnabled {
-                clearClaudeData()
-            }
+            // The two paths produce different kinds of number (a measured percentage vs a token
+            // count), so the displayed value is dropped rather than relabelled: an API
+            // percentage must not linger as an "estimate", and an estimate must not be shown as
+            // a live quota reading. The next poll repopulates the card from the active path.
+            clearClaudeData()
             rebuildScheduler()
+            Task { await tick() }
         }
     }
 
@@ -286,10 +289,11 @@ final class AppModel {
         ProviderID.allCases.filter { enabledProviders.contains($0) }
     }
 
-    /// Providers that may actually make a request. Claude is excluded until the user
-    /// opts in, which is what keeps its Keychain item untouched by default.
+    /// Providers that may actually make a request. Claude is always pollable: with the token read
+    /// off its fetch is served by the credential-free local-log aggregator (issue #16), so
+    /// nothing in the Keychain is touched either way.
     var pollableProviders: [ProviderID] {
-        orderedProviders.filter { $0 != .claudeCode || claudeOAuthReadEnabled }
+        orderedProviders
     }
 
     var isClaudeCardActive: Bool {
@@ -301,16 +305,14 @@ final class AppModel {
     }
 
     func snapshot(for provider: ProviderID) -> UsageSnapshot? {
-        guard provider != .claudeCode || claudeOAuthReadEnabled else { return nil }
-        return snapshots[provider]
+        snapshots[provider]
     }
 
     /// History trail for one card, or `nil` when that card has nothing to plot. The view
     /// still applies the "fewer than two samples draws nothing" rule, so a short series is
     /// returned as-is rather than padded to look meaningful.
     func sparkline(for provider: ProviderID) -> SparklineData? {
-        guard provider != .claudeCode || claudeOAuthReadEnabled else { return nil }
-        return sparklines[provider]
+        sparklines[provider]
     }
 
     /// Value shown in the menu bar, after the user's window preference. `nil` means the
@@ -358,7 +360,6 @@ final class AppModel {
         }
 
         let entries = orderedProviders.compactMap { provider -> UsageFormat.MenuBarEntry? in
-            guard provider != .claudeCode || claudeOAuthReadEnabled else { return nil }
             guard let snapshot = snapshots[provider],
                 snapshot.hasValues,
                 let value = menuBarValue(for: snapshot)
@@ -372,7 +373,9 @@ final class AppModel {
                     provider: provider,
                     remainingFraction: value.fraction,
                     text: value.text,
-                    isApproximate: false
+                    // A local-log estimate is a token count, not a measured quota: the `~` keeps
+                    // it from reading as a fresh reading either.
+                    isApproximate: snapshot.source == .localLogs
                 )
             case .stale(let age):
                 // A very old number is left out of the most prominent surface entirely.
@@ -417,7 +420,8 @@ final class AppModel {
 
         let cached = await cache.load()
         let now = Date()
-        for (provider, snapshot) in cached where pollableProviders.contains(provider) {
+        for (provider, snapshot) in cached
+        where pollableProviders.contains(provider) && acceptsCached(snapshot) {
             snapshots[provider] = snapshot.aged(now: now, staleAfter: staleAfter)
         }
 
@@ -523,8 +527,15 @@ final class AppModel {
 
     private func makeProviders() -> [any UsageProvider] {
         var providers: [any UsageProvider] = []
-        if enabledProviders.contains(.claudeCode), claudeOAuthReadEnabled {
-            providers.append(ClaudeCodeProvider())
+        if enabledProviders.contains(.claudeCode) {
+            // Always present: with the token read off this provider is served entirely by the
+            // local-log aggregator, which never touches the Keychain (issue #16).
+            providers.append(
+                ClaudeCodeProvider(
+                    credentialReadEnabled: claudeOAuthReadEnabled,
+                    localLogs: ClaudeLocalLogAggregator()
+                )
+            )
         }
         if enabledProviders.contains(.codex) {
             providers.append(CodexProvider())
@@ -600,6 +611,14 @@ final class AppModel {
         // The on-disk trail is shared by every provider and has no per-provider clear (the
         // core API is frozen for #7), so Claude samples age out with the seven-day retention.
         Task { await persist() }
+    }
+
+    /// A cached token-path reading must not be shown while that path is off: the card would
+    /// claim a live quota value from a credential the app is no longer allowed to read. Cached
+    /// local-log estimates are fine either way — they are just old token counts.
+    private func acceptsCached(_ snapshot: UsageSnapshot) -> Bool {
+        guard snapshot.provider == .claudeCode, !claudeOAuthReadEnabled else { return true }
+        return snapshot.source == .localLogs || snapshot.source == .cache
     }
 
     private func persist() async {
@@ -685,8 +704,9 @@ final class AppModel {
     private func notifyIfNeeded() {
         guard notificationsEnabled, !notificationsPermissionDenied else { return }
 
-        // Same visibility rules as the cards: a disabled provider, or Claude without the
-        // read opt-in, must not alert.
+        // Same visibility rules as the cards: a disabled provider must not alert. Claude's
+        // local-log estimate is visible but its windows are `isEstimated`, which the planner
+        // skips — an estimate can never fire a threshold.
         let visible = orderedProviders.compactMap { snapshot(for: $0) }
         guard !visible.isEmpty else { return }
 

@@ -46,7 +46,7 @@ macOS 메뉴바에 Claude Code / OpenAI(Codex) / Go 의 **남은 사용량과 �
 
 | Provider | 1차 소스 | 폴백 | 비고 |
 |---|---|---|---|
-| **Claude Code** | `GET https://api.anthropic.com/api/oauth/usage` + Bearer + `anthropic-beta: oauth-2025-04-20` + **`User-Agent: claude-code/2.1.80`(필수)** | `~/.claude/projects/**/*.jsonl` 집계 (`estimated` 라벨) | Keychain `Claude Code-credentials` **읽기 전용, refresh 금지**(토큰 회전이 사용자 CLI 세션을 끊음). 최소 180초 간격, UA 없으면 429 폭풍 |
+| **Claude Code** | `GET https://api.anthropic.com/api/oauth/usage` + Bearer + `anthropic-beta: oauth-2025-04-20` + **`User-Agent: claude-code/2.1.80`(필수)** | `~/.claude/projects/**/*.jsonl` 증분 집계 → 5h/7d **토큰 수량만**(퍼센트 없음, `usedFraction` 미사용, `estimated` 라벨, #16) | Keychain `Claude Code-credentials` **읽기 전용, refresh 금지**(토큰 회전이 사용자 CLI 세션을 끊음). 최소 180초 간격, UA 없으면 429 폭풍. 토큰 읽기 off(기본)면 Keychain을 아예 열지 않는다 |
 | **OpenAI Codex** | `codex app-server` → `account/rateLimits/read` (문서화된 JSON-RPC) | `GET https://chatgpt.com/backend-api/wham/usage` + `~/.codex/auth.json` 토큰 → 최후: `sessions/**/*.jsonl`의 `rate_limits` 블록 | refresh 금지. `auth.json` 없으면 `.notInstalled`. `reset_at`은 epoch **초** |
 | **OpenCode Go** | `GET https://opencode.ai/zen/go/v1/usage` + Bearer `oc_sk_…` 키 | 마지막 성공 스냅샷 | `rolling`(5h) / `weekly`(7d) / `monthly` 3윈도우, `percent`=사용률 0–100. 403=구독 없음(`.notSubscribed`) |
 | **Antigravity** (선택, 기본 off) | **`agy -p /usage --output-format json`** 서브프로세스 실행 후 출력 파싱 | 마지막 성공 스냅샷 | `gemini`/`3P` × `5h`/`weekly`. `remainingFraction`은 **남은 값(0–1)** → `used = 1 - remaining`. 자격증명·Google 엔드포인트 **절대 접근 금지**(ToS §6, 실제 계정 제재 사례). 5–10분 간격 |

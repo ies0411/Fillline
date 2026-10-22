@@ -8,11 +8,88 @@ Provider ID: `claude-code`
 | Order | Source | Official? | Used for |
 |---|---|---|---|
 | 1 | `GET https://api.anthropic.com/api/oauth/usage` | undocumented | absolute % of the 5h session + weekly windows |
-| 2 | `~/.claude/projects/**/*.jsonl` aggregation | local, official file format | token counts when the API is unavailable, **labelled `estimated`** |
+| 2 | `~/.claude/projects/**/*.jsonl` aggregation | local, official file format | token counts when the token read is off or the API cannot answer, **labelled `estimated`** (implemented in #16, see below) |
 | — | `statusLine` stdin JSON (`rate_limits.*`) | **documented** | future opt-in: zero-credential path. Requires writing `~/.claude/settings.json`, so it needs explicit user consent |
 
-We ship source 1 as the default because it needs no config mutation, and gate it behind a
-"Read Claude Code login" toggle (see §Legal).
+Source 1 is **opt-in and off by default**, gated behind a "Read Claude Code login" toggle (see
+§Legal). With the toggle off — the default — the card is served by source 2 and never touches
+the Keychain; source 1 only wins when the user has opted in and the endpoint answers.
+
+## Local-log aggregation (source 2, implemented 2026-10-23)
+
+`ClaudeLocalLogAggregator` (`Sources/UsageCore/Providers/ClaudeCode/`) reads the transcripts
+Claude Code already writes and reports token **quantities**. It is read-only: files are opened
+with `FileHandle(forReadingFrom:)`, nothing under `~/.claude` is created, written or moved, and
+no Keychain item, config file or network endpoint is touched.
+
+### File shape
+
+`~/.claude/projects/<project-slug>/<session-uuid>.jsonl`, newline-delimited JSON. Only
+`type: "assistant"` records that carry `message.usage` are read:
+
+```json
+{"type":"assistant","timestamp":"2026-10-22T11:51:03.943Z","requestId":"req_…",
+ "message":{"model":"claude-opus-5-5","usage":{
+   "input_tokens":2,"output_tokens":324,
+   "cache_creation_input_tokens":16191,"cache_read_input_tokens":29200}}}
+```
+
+`user`, `api-request`, `api-request-blob`, `attachment`, `permission-mode`, `last-prompt`,
+`mode`, `atis-latch` and `summary` records are ignored. `timestamp` is ISO-8601 with
+**milliseconds** and a `Z` suffix.
+
+### Token definition
+
+```
+tokens = input_tokens + output_tokens + cache_creation_input_tokens + cache_read_input_tokens
+```
+
+Every field is optional and a missing one counts as 0. Cache reads are the bulk of a real
+session (16k cache_creation / 29k cache_read against 2 input tokens in the sample above), so
+excluding them would understate usage by an order of magnitude — the number is documented rather
+than hidden.
+
+### Windows
+
+- 5-hour total: `now - 5h <= timestamp <= now`.
+- 7-day total: `now - 7d <= timestamp <= now`.
+- **The left edge is inclusive**: a record exactly on a boundary counts. Records newer than
+  `now` are ignored (clock skew). Membership is decided by `timestamp`, never by file order.
+- The same `requestId` written more than once counts once (earliest copy wins).
+
+### Output
+
+| kind | label | value |
+|---|---|---|
+| `.rolling` | `"1.2M tokens · 5h"` | five-hour total |
+| `.weekly7d` | `"6.3M tokens · 7d"` | seven-day total |
+
+`source: .localLogs`, `status: .ok`. Empty/absent directory or no assistant records →
+`status: .unsupported` with no windows (never `0%`). Unreadable files and symbolic links are
+skipped, not followed.
+
+**No percentage is ever produced.** Local logs contain no plan limit, so there is nothing to
+divide by: `usedFraction` stays at the model's "no fraction" value (`0` — the model deliberately
+has no optional fraction) and the label carries the quantity. `isEstimated: true` and the
+existing amount-row path (`UsageFormat.isAmountRow`) render the row as text with no meter and
+keep it out of the menu-bar percentage, the "lowest" summary, sparklines and alerts.
+
+### Freshness caveat
+
+These numbers describe **your own usage, not the provider's remaining quota**. Claude's 5-hour
+session and weekly limits cannot be derived from local logs, so the card says `Estimated` and
+shows a count. With the token read on, a successful API response wins and this path is not
+shown; it only stands in when the credential or endpoint cannot answer, and then the failure
+status is kept so stale API values are never replaced by an estimate.
+
+### Incremental scan
+
+Each file's `(offset, size, mtime)` is remembered and a poll parses only the appended byte range.
+A truncated or in-place rewritten file resets that file's offset and records. Only
+newline-terminated lines are consumed, so a crash-truncated tail is re-read after the next append
+instead of counted twice. Malformed lines are skipped and counted internally; the count is never
+shown in UI copy. A directory that grows to 47 files / 7,459 lines today costs one full scan after
+launch and only appended bytes afterwards.
 
 ## Credential
 
@@ -96,7 +173,8 @@ Traps observed:
 
 **결정:** A를 유지하되 **"Advanced · Claude Code"로 강등**하고 기본 off (v0.3.0에서 UI 반영 완료).
 B는 #10으로 구현하되, 켜져 있으면 A를 자동으로 끈다(둘 중 하나만). 둘 다 기본값이 아니다 —
-기본 상태의 Claude 카드는 로컬 로그 집계(`estimated`)만 보여준다.
+기본 상태의 Claude 카드는 로컬 로그 집계(`estimated`)만 보여준다 (소스 2는 #16에서 구현:
+퍼센트 없이 5h/7d 토큰 수량만).
 
 ## Legal
 

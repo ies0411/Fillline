@@ -7,7 +7,7 @@
     "phase": "Phase 1 — MVP 거의 완료 (앱 빌드·실행 확인)",
     "version": "v0.4.0-alpha.1",
     "license": "MIT",
-    "commits": 38,
+    "commits": 41,
     "branch": "main",
     "pushed": true,
     "issues": 8,
@@ -522,6 +522,10 @@
     {
       "date": "2026-10-22",
       "text": "보고서에 '사용법' 탭 추가 — 설치·첫 실행(ad-hoc 우회), provider 6개 켜는 법, 메뉴바 표기 읽는 법, 문제 해결 6종"
+    },
+    {
+      "date": "2026-10-23",
+      "text": "Claude 로컬 로그 집계 구현 — 토큰 읽기 off 상태에서도 카드가 5h/7d 토큰 수량을 표시(퍼센트 없음, `estimated`). 테스트 151개"
     }
   ],
   "usage": {

@@ -9,6 +9,22 @@ broken parser ships as a patch release.
 
 ## [Unreleased]
 
+### Added
+- **Claude Code local-log estimate** (issue #16). With the token read off — the default — the
+  Claude card now counts tokens from the JSONL transcripts under `~/.claude/projects` instead of
+  showing an empty panel. Two quantities are reported, `5h` and `7d`, defined as
+  `input + output + cache_creation + cache_read`; the files are read incrementally (only appended
+  bytes are parsed) and never written. **No percentage is derived** — local logs contain no plan
+  limit, so the rows carry a token count (`"1.2M tokens · 5h"`), are flagged `isEstimated`, draw
+  no meter and stay out of the menu bar percentage, sparklines and alerts. With the token read on,
+  a successful API response still wins and the estimate is only the fallback.
+
+### Fixed
+- Turning the Claude token read on or off no longer leaves the previous path's number on the
+  card: the displayed value is dropped and repopulated from the path that is now active, and a
+  cached API reading is not loaded while the read is off.
+
+
 ## [0.4.0-alpha.1] — 2026-10-22
 
 Fourth alpha. Two more providers, and the first release whose screenshots are rendered from the
