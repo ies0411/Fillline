@@ -305,7 +305,7 @@ private struct OnboardingView: View {
     private var claudePanel: some View {
         VStack(alignment: .leading, spacing: 7) {
             HStack(spacing: 8) {
-                Text("Claude Code login")
+                Text("Advanced · read my Claude token")
                     .font(.system(size: 11.5, weight: .medium))
 
                 Spacer(minLength: 4)
@@ -314,7 +314,7 @@ private struct OnboardingView: View {
                     .labelsHidden()
                     .toggleStyle(.switch)
                     .controlSize(.small)
-                    .accessibilityLabel("Read Claude Code login")
+                    .accessibilityLabel("Read my Claude Code token")
             }
 
             Text(
@@ -325,7 +325,7 @@ private struct OnboardingView: View {
             .foregroundStyle(.secondary)
 
             Text(
-                "Anthropic's policy doesn't allow apps to collect Claude.ai credentials, so this stays off unless you choose it."
+                "The only provider that reads a stored credential. Anthropic's policy doesn't allow apps to collect Claude.ai credentials, so this stays off unless you choose it."
             )
             .font(.system(size: 10))
             .foregroundStyle(.secondary)

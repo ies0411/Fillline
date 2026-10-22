@@ -14,8 +14,8 @@ struct SettingsView: View {
             menuBarSection(number: $bindable.menuBarNumber, style: $bindable.menuBarStyle)
             providersSection
             notificationsSection(enabled: $bindable.notificationsEnabled)
-            claudeSection(oauthEnabled: $bindable.claudeOAuthReadEnabled)
             startupSection
+            claudeSection(oauthEnabled: $bindable.claudeOAuthReadEnabled)
             aboutSection
         }
         .formStyle(.grouped)
@@ -154,15 +154,25 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: Claude Code
+    // MARK: Advanced · Claude Code
+    //
+    // Demoted to the bottom of Settings on purpose (AGENTS §2): this is the only provider
+    // that reads a credential file we did not create, so it must never look like a
+    // default-on switch sitting next to "Check every 60 s".
 
     private func claudeSection(oauthEnabled: Binding<Bool>) -> some View {
-        Section("Claude Code") {
-            Toggle("Read Claude Code login", isOn: oauthEnabled)
+        Section("Advanced · Claude Code") {
+            Toggle("Read my Claude Code token", isOn: oauthEnabled)
                 .disabled(!model.isProviderEnabled(.claudeCode))
 
             Text(
-                "Off by default. The token is read-only, held in memory, and never refreshed. Anthropic's policy restricts apps from collecting Claude.ai credentials, so this is your call."
+                "The only provider that reads a stored credential. Off by default: the token is held in memory, used for one request, and never refreshed or written back."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+
+            Text(
+                "Anthropic's credential policy restricts apps from collecting Claude.ai credentials. Turning this on is your decision, and it may break if Anthropic changes the endpoint."
             )
             .font(.caption)
             .foregroundStyle(.secondary)
